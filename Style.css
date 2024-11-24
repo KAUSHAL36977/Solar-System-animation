@@ -19,10 +19,12 @@ body {
     position: absolute;
     top: 10px;
     left: 10px;
-    background-color: rgba(0, 0, 0, 0.7);
+    background-color: rgba(0, 0, 0, 0.8);
     padding: 15px;
     border-radius: 5px;
     max-width: 300px;
+    max-height: 80vh;
+    overflow-y: auto;
     display: none;
     transition: opacity 0.3s ease-in-out;
 }
@@ -30,6 +32,10 @@ body {
 #info-panel h2 {
     margin-top: 0;
     color: #4CAF50;
+}
+
+#celestial-description p {
+    margin-bottom: 10px;
 }
 
 #controls {
