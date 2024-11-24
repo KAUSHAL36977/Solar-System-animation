@@ -245,3 +245,76 @@ function getAverageColor(imagePath) {
 
 init();
 animate();
+
+
+function createEarth(scene) {
+    // Earth Texture URLs (Replace with your own paths if necessary)
+    const earthTexture = 'path/to/earth_texture.jpg'; // Earth's surface texture
+    const earthCloudTexture = 'path/to/earth_clouds.png'; // Earth's clouds texture
+    const earthBumpMap = 'path/to/earth_bump_map.jpg'; // Elevation map for realistic terrain
+
+    // Earth Geometry
+    const earthRadius = 1; // Earth radius scaling
+    const earthSegments = 64;
+
+    // Earth Material
+    const earthMaterial = new THREE.MeshStandardMaterial({
+        map: new THREE.TextureLoader().load(earthTexture), // Base texture for Earth's surface
+        bumpMap: new THREE.TextureLoader().load(earthBumpMap), // Bump map for terrain
+        bumpScale: 0.05, // Adjust bump intensity
+    });
+
+    // Earth Mesh
+    const earthGeometry = new THREE.SphereGeometry(earthRadius, earthSegments, earthSegments);
+    const earthMesh = new THREE.Mesh(earthGeometry, earthMaterial);
+
+    // Add rotation axis tilt (23.5° tilt)
+    earthMesh.rotation.z = THREE.MathUtils.degToRad(23.5);
+
+    // Clouds Geometry and Material
+    const cloudGeometry = new THREE.SphereGeometry(earthRadius + 0.02, earthSegments, earthSegments);
+    const cloudMaterial = new THREE.MeshStandardMaterial({
+        map: new THREE.TextureLoader().load(earthCloudTexture),
+        transparent: true,
+        opacity: 0.8,
+    });
+
+    const cloudMesh = new THREE.Mesh(cloudGeometry, cloudMaterial);
+
+    // Group Earth and Clouds
+    const earthGroup = new THREE.Group();
+    earthGroup.add(earthMesh);
+    earthGroup.add(cloudMesh);
+
+    // Add Earth Rotation
+    function rotateEarth() {
+        earthMesh.rotation.y += 0.001; // Rotate Earth slowly
+        cloudMesh.rotation.y += 0.0012; // Clouds rotate slightly faster for realism
+    }
+
+    // Add Earth and Clouds to Scene
+    scene.add(earthGroup);
+
+    // Return Rotate Function for Animation Loop
+    return rotateEarth;
+}
+
+
+
+const scene = new THREE.Scene();
+
+// Create Earth
+const rotateEarth = createEarth(scene);
+
+// Animation Loop
+function animate() {
+    requestAnimationFrame(animate);
+
+    // Rotate Earth
+    rotateEarth();
+
+    // Render the scene
+    renderer.render(scene, camera);
+}
+
+animate();
