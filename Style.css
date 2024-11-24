@@ -1,76 +1,55 @@
 
 body {
     margin: 0;
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: #000;
     overflow: hidden;
+    font-family: Arial, sans-serif;
+    background-color: #000;
+    color: #fff;
 }
 
-#solar-system {
-    position: relative;
-    width: 100vw;
-    height: 100vh;
-    transform-style: preserve-3d;
-    animation: rotate 100s infinite linear;
+#canvas-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
 }
 
-.celestial-body, .planet, .moon {
+#info-panel {
     position: absolute;
-    border-radius: 50%;
-    transform-style: preserve-3d;
+    top: 10px;
+    left: 10px;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 15px;
+    border-radius: 5px;
+    max-width: 300px;
+    display: none;
 }
 
-#sun {
-    width: 50px;
-    height: 50px;
-    background-color: #FDB813;
-    box-shadow: 0 0 60px #FDB813;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-}
-
-.planet {
-    animation: orbit linear infinite;
-}
-
-#mercury { width: 10px; height: 10px; background-color: #B5B5B5; animation-duration: 3s; }
-#venus { width: 15px; height: 15px; background-color: #FFC649; animation-duration: 7s; }
-#earth { width: 16px; height: 16px; background-color: #6B93D6; animation-duration: 10s; }
-#mars { width: 14px; height: 14px; background-color: #C1440E; animation-duration: 19s; }
-#jupiter { width: 36px; height: 36px; background-color: #C9B5A0; animation-duration: 120s; }
-#saturn { width: 30px; height: 30px; background-color: #F4D4A9; animation-duration: 294s; }
-#uranus { width: 26px; height: 26px; background-color: #CAE9FF; animation-duration: 840s; }
-#neptune { width: 24px; height: 24px; background-color: #5B5DDF; animation-duration: 1647s; }
-#pluto { width: 8px; height: 8px; background-color: #FBF2E1; animation-duration: 2480s; }
-
-#moon {
-    width: 4px;
-    height: 4px;
-    background-color: #D0D0D0;
-    animation: orbit 2s linear infinite;
-}
-
-#asteroid-belt {
+#controls {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 300px;
-    height: 300px;
-    border: 1px dotted #555;
-    border-radius: 50%;
-    transform: translate(-50%, -50%) rotateX(60deg);
+    bottom: 10px;
+    left: 10px;
 }
 
-@keyframes orbit {
-    from { transform: rotateY(0deg) translateX(100px) rotateY(0deg); }
-    to { transform: rotateY(360deg) translateX(100px) rotateY(-360deg); }
+button {
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 5px;
 }
 
-@keyframes rotate {
-    from { transform: rotateX(-60deg) rotateY(0deg); }
-    to { transform: rotateX(-60deg) rotateY(360deg); }
+.planet-label {
+    color: #fff;
+    font-size: 12px;
+    padding: 2px 5px;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 3px;
 }
