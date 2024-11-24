@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Solar System</title>
+    <title>Enhanced 2D Solar System</title>
     <style>
         body {
             margin: 0;
@@ -21,71 +21,43 @@
             position: relative;
             width: 100vw;
             height: 100vh;
-            transform-style: preserve-3d;
-            animation: rotate 100s infinite linear;
         }
 
-        .celestial-body, .planet, .moon {
+        .celestial-body, .planet {
             position: absolute;
             border-radius: 50%;
-            transform-style: preserve-3d;
-            transition: transform 0.2s;
-        }
-
-        #sun {
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-
-        .planet {
-            top: 50%;
-            left: 50%;
-            transform-origin: center center;
-        }
-
-        #moon {
-            width: 2px;
-            height: 2px;
-            background-color: #D0D0D0;
-            animation: orbit 2s linear infinite;
-        }
-
-        #saturn-rings {
-            position: absolute;
-            border: 1px solid rgba(210, 180, 140, 0.8);
-            border-radius: 50%;
-            transform: rotateX(75deg);
         }
 
         #asteroid-belt {
             position: absolute;
-            top: 50%;
-            left: 50%;
+            border: 1px dotted #555;
             border-radius: 50%;
-            transform: translate(-50%, -50%) rotateX(60deg);
         }
 
-        .tooltip {
-            position: absolute;
-            background-color: rgba(0, 0, 0, 0.7);
+        .planet-label {
             color: white;
-            padding: 5px;
-            border-radius: 5px;
             font-size: 12px;
+            white-space: nowrap;
             pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.2s;
         }
 
-        @keyframes orbit {
-            from { transform: rotateY(0deg) translateX(100px) rotateY(0deg); }
-            to { transform: rotateY(360deg) translateX(100px) rotateY(-360deg); }
+        .asteroid {
+            position: absolute;
+            background-color: #555;
+            border-radius: 50%;
         }
 
-        @keyframes rotate {
-            from { transform: rotateX(-60deg) rotateY(0deg); }
-            to { transform: rotateX(-60deg) rotateY(360deg); }
+        @keyframes twinkle {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+
+        .star {
+            position: absolute;
+            background-color: white;
+            width: 1px;
+            height: 1px;
         }
     </style>
 </head>
@@ -94,15 +66,11 @@
         <div id="sun" class="celestial-body" data-name="Sun"></div>
         <div id="mercury" class="planet" data-name="Mercury"></div>
         <div id="venus" class="planet" data-name="Venus"></div>
-        <div id="earth" class="planet" data-name="Earth">
-            <div id="moon" class="moon" data-name="Moon"></div>
-        </div>
+        <div id="earth" class="planet" data-name="Earth"></div>
         <div id="mars" class="planet" data-name="Mars"></div>
         <div id="asteroid-belt"></div>
         <div id="jupiter" class="planet" data-name="Jupiter"></div>
-        <div id="saturn" class="planet" data-name="Saturn">
-            <div id="saturn-rings"></div>
-        </div>
+        <div id="saturn" class="planet" data-name="Saturn"></div>
         <div id="uranus" class="planet" data-name="Uranus"></div>
         <div id="neptune" class="planet" data-name="Neptune"></div>
         <div id="pluto" class="planet" data-name="Pluto"></div>
