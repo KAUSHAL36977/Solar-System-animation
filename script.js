@@ -1,3 +1,4 @@
+// Updated 2D Solar System Animation
 
 document.addEventListener('DOMContentLoaded', () => {
     const solarSystem = document.getElementById('solar-system');
