@@ -1,111 +1,100 @@
 
-let scene, camera, renderer, controls;
-let sun, planets = {};
-const planetData = {
-    mercury: { radius: 0.383, orbitRadius: 57.9, texture: 'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/mercury.jpg' },
-    venus: { radius: 0.949, orbitRadius: 108.2, texture: 'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/venus_surface.jpg' },
-    earth: { radius: 1, orbitRadius: 149.6, texture: 'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_atmos_2048.jpg' },
-    mars: { radius: 0.532, orbitRadius: 227.9, texture: 'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/mars.jpg' },
-    jupiter: { radius: 11.21, orbitRadius: 778.6, texture: 'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/jupiter.jpg' },
-    saturn: { radius: 9.45, orbitRadius: 1433.5, texture: 'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/saturn.jpg' },
-    uranus: { radius: 4.01, orbitRadius: 2872.5, texture: 'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/uranus.jpg' },
-    neptune: { radius: 3.88, orbitRadius: 4495.1, texture: 'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/neptune.jpg' },
-};
-
-function init() {
-    scene = new THREE.Scene();
-    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000);
-    camera.position.z = 50;
-
-    renderer = new THREE.WebGLRenderer();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(renderer.domElement);
-
-    controls = new THREE.OrbitControls(camera, renderer.domElement);
-
-    createSun();
-    createPlanets();
-    createStars();
-
-    window.addEventListener('resize', onWindowResize, false);
-}
-
-function createSun() {
-    const geometry = new THREE.SphereGeometry(5, 32, 32);
-    const material = new THREE.MeshBasicMaterial({ color: 0xffff00 });
-    sun = new THREE.Mesh(geometry, material);
-    scene.add(sun);
-
-    const sunlight = new THREE.PointLight(0xffffff, 1.5, 1000);
-    scene.add(sunlight);
-}
-
-function createPlanets() {
-    const textureLoader = new THREE.TextureLoader();
-    for (const [name, data] of Object.entries(planetData)) {
-        const geometry = new THREE.SphereGeometry(data.radius * 0.1, 32, 32);
-        const material = new THREE.MeshPhongMaterial({
-            map: textureLoader.load(data.texture),
-        });
-        const planet = new THREE.Mesh(geometry, material);
-        planet.position.x = data.orbitRadius * 0.3;
-        scene.add(planet);
-        planets[name] = planet;
-
-        // Create orbit
-        const orbitGeometry = new THREE.BufferGeometry();
-        const orbitMaterial = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.3 });
-        const orbitPoints = [];
-        for (let i = 0; i <= 360; i++) {
-            const angle = (i * Math.PI) / 180;
-            const x = Math.cos(angle) * data.orbitRadius * 0.3;
-            const z = Math.sin(angle) * data.orbitRadius * 0.3;
-            orbitPoints.push(new THREE.Vector3(x, 0, z));
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced 3D Solar System Animation</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+            background-color: #000;
+            color: #fff;
         }
-        orbitGeometry.setFromPoints(orbitPoints);
-        const orbit = new THREE.Line(orbitGeometry, orbitMaterial);
-        scene.add(orbit);
-    }
-}
 
-function createStars() {
-    const geometry = new THREE.BufferGeometry();
-    const vertices = [];
-    for (let i = 0; i < 10000; i++) {
-        vertices.push(
-            Math.random() * 2000 - 1000,
-            Math.random() * 2000 - 1000,
-            Math.random() * 2000 - 1000
-        );
-    }
-    geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
-    const material = new THREE.PointsMaterial({ color: 0xffffff, size: 0.7 });
-    const stars = new THREE.Points(geometry, material);
-    scene.add(stars);
-}
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
 
-function animate() {
-    requestAnimationFrame(animate);
+        #info-panel {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 5px;
+            max-width: 300px;
+            display: none;
+        }
 
-    // Rotate planets
-    for (const [name, planet] of Object.entries(planets)) {
-        const data = planetData[name];
-        const speed = 1 / Math.sqrt(data.orbitRadius);
-        const angle = Date.now() * speed * 0.001;
-        planet.position.x = Math.cos(angle) * data.orbitRadius * 0.3;
-        planet.position.z = Math.sin(angle) * data.orbitRadius * 0.3;
-        planet.rotation.y += 0.01;
-    }
+        #controls {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+        }
 
-    controls.update();
-    renderer.render(scene, camera);
-}
+        button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
 
-function onWindowResize() {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-}
+        .planet-label {
+            color: #fff;
+            font-size: 12px;
+            padding: 2px 5px;
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 3px;
+            pointer-events: none;
+        }
 
-init();
-animate();
+        #simulation-info {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .dg.ac {
+            z-index: 1000 !important;
+        }
+    </style>
+</head>
+<body>
+    <div id="canvas-container"></div>
+    <div id="info-panel">
+        <h2 id="celestial-name"></h2>
+        <p id="celestial-description"></p>
+    </div>
+    <div id="controls">
+        <button id="toggle-orbits">Toggle Orbits</button>
+        <button id="toggle-labels">Toggle Labels</button>
+        <button id="toggle-scale">Toggle Scale</button>
+    </div>
+    <div id="simulation-info">
+        <div id="simulation-time"></div>
+        <div id="simulation-speed"></div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.7/dat.gui.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/renderers/CSS2DRenderer.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
