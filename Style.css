@@ -1,184 +1,101 @@
 
-let scene, camera, renderer, controls, clock;
-let sun, planets = {}, moons = {}, orbits = {}, labels = {}, atmospheres = {};
-let timeSpeed = 1, simulationTime = 0;
-let selectedObject = null;
-let realScale = false;
-let touring = false;
-let tourTargets = [];
-let currentTourIndex = 0;
-
-const planetData = {
-    mercury: { radius: 0.383, orbitRadius: 57.9, rotationPeriod: 58.65, orbitPeriod: 88, axialTilt: 0.034, texture: 'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/mercury.jpg' },
-    venus: { radius: 0.949, orbitRadius: 108.2, rotationPeriod: -243, orbitPeriod: 224.7, axialTilt: 177.4, texture: 'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/venus_surface.jpg', hasAtmosphere: true },
-    earth: { radius: 1, orbitRadius: 149.6, rotationPeriod: 1, orbitPeriod: 365.2, axialTilt: 23.44, texture: 'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_atmos_2048.jpg', bumpMap: 'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_normal_2048.jpg', hasAtmosphere: true },
-    mars: { radius: 0.532, orbitRadius: 227.9, rotationPeriod: 1.03, orbitPeriod: 687, axialTilt: 25.19, texture: 'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/mars.jpg', hasAtmosphere: true },
-    jupiter: { radius: 11.21, orbitRadius: 778.6, rotationPeriod: 0.41, orbitPeriod: 4331, axialTilt: 3.13, texture: 'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/jupiter.jpg' },
-    saturn: { radius: 9.45, orbitRadius: 1433.5, rotationPeriod: 0.44, orbitPeriod: 10747, axialTilt: 26.73, texture: 'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/saturn.jpg', hasRings: true },
-    uranus: { radius: 4.01, orbitRadius: 2872.5, rotationPeriod: -0.72, orbitPeriod: 30589, axialTilt: 97.77, texture: 'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/uranus.jpg' },
-    neptune: { radius: 3.88, orbitRadius: 4495.1, rotationPeriod: 0.67, orbitPeriod: 59800, axialTilt: 28.32, texture: 'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/neptune.jpg' },
-};
-
-const moonData = {
-    luna: { parent: 'earth', radius: 0.2724, orbitRadius: 2.5, rotationPeriod: 27.3, orbitPeriod: 27.3, texture: 'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/moon.jpg' },
-    io: { parent: 'jupiter', radius: 0.286, orbitRadius: 15, rotationPeriod: 1.77, orbitPeriod: 1.77, texture: 'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/io.jpg' },
-    europa: { parent: 'jupiter', radius: 0.245, orbitRadius: 18, rotationPeriod: 3.55, orbitPeriod: 3.55, texture: 'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/europa.jpg' },
-    ganymede: { parent: 'jupiter', radius: 0.413, orbitRadius: 21, rotationPeriod: 7.15, orbitPeriod: 7.15, texture: 'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/ganymede.jpg' },
-    callisto: { parent: 'jupiter', radius: 0.378, orbitRadius: 24, rotationPeriod: 16.69, orbitPeriod: 16.69, texture: 'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/callisto.jpg' },
-};
-
-const asteroidData = {
-    ceres: { radius: 0.0742, orbitRadius: 413.7, rotationPeriod: 0.378, orbitPeriod: 1680, texture: 'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/moon.jpg' },
-    vesta: { radius: 0.0409, orbitRadius: 353.3, rotationPeriod: 0.223, orbitPeriod: 1325, texture: 'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/moon.jpg' },
-};
-
-function init() {
-    scene = new THREE.Scene();
-    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000);
-    camera.position.z = 50;
-
-    renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.getElementById('canvas-container').appendChild(renderer.domElement);
-
-    controls = new THREE.OrbitControls(camera, renderer.domElement);
-    clock = new THREE.Clock();
-
-    createSun();
-    createPlanets();
-    createMoons();
-    createAsteroids();
-    createStars();
-    createAsteroidBelt();
-
-    window.addEventListener('resize', onWindowResize, false);
-    document.getElementById('toggle-orbits').addEventListener('click', toggleOrbits);
-    document.getElementById('toggle-labels').addEventListener('click', toggleLabels);
-    document.getElementById('toggle-scale').addEventListener('click', toggleScale);
-    document.getElementById('start-tour').addEventListener('click', startTour);
-    document.getElementById('search-button').addEventListener('click', searchCelestialBody);
-    
-    const gui = new dat.GUI();
-    gui.add(window, 'timeSpeed', 0, 10).name('Time Speed');
-    
-    renderer.domElement.addEventListener('click', onCanvasClick, false);
+body {
+    margin: 0;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+    background-color: #000;
+    color: #fff;
 }
 
-// ... [Previous functions remain largely the same, with some modifications] ...
+#canvas-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
 
-function createPlanets() {
-    const textureLoader = new THREE.TextureLoader();
-    for (const [name, data] of Object.entries(planetData)) {
-        const geometry = new THREE.SphereGeometry(data.radius * 0.5, 32, 32);
-        const material = new THREE.MeshPhongMaterial({
-            map: textureLoader.load(data.texture),
-            bumpMap: data.bumpMap ? textureLoader.load(data.bumpMap) : null,
-            bumpScale: 0.05,
-        });
-        const planet = new THREE.Mesh(geometry, material);
-        planet.rotation.x = THREE.MathUtils.degToRad(data.axialTilt);
-        planet.name = name;
-        scene.add(planet);
-        planets[name] = planet;
+#info-panel {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 15px;
+    border-radius: 5px;
+    max-width: 300px;
+    display: none;
+}
 
-        if (data.hasRings) {
-            createRings(planet, data);
-        }
+#controls {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
 
-        if (data.hasAtmosphere) {
-            createAtmosphere(planet, data);
-        }
+#search-container {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    align-items: center;
+}
 
-        createOrbit(name, data);
-        createLabel(name, data);
+input, button {
+    margin: 5px;
+    padding: 8px 12px;
+    font-size: 14px;
+    border: none;
+    border-radius: 4px;
+}
+
+input {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+button {
+    background-color: #4CAF50;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+.planet-label {
+    color: #fff;
+    font-size: 12px;
+    padding: 2px 5px;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 3px;
+    pointer-events: none;
+}
+
+#simulation-info {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.dg.ac {
+    z-index: 1000 !important;
+}
+
+@media (max-width: 600px) {
+    #controls {
+        flex-direction: column;
+    }
+
+    #search-container {
+        flex-direction: column;
+        align-items: flex-end;
     }
 }
-
-function createAtmosphere(planet, data) {
-    const geometry = new THREE.SphereGeometry(data.radius * 0.5 * 1.01, 32, 32);
-    const material = new THREE.MeshPhongMaterial({
-        color: 0x88ccff,
-        transparent: true,
-        opacity: 0.3,
-        side: THREE.DoubleSide
-    });
-    const atmosphere = new THREE.Mesh(geometry, material);
-    planet.add(atmosphere);
-    atmospheres[planet.name] = atmosphere;
-}
-
-function createAsteroids() {
-    const textureLoader = new THREE.TextureLoader();
-    for (const [name, data] of Object.entries(asteroidData)) {
-        const geometry = new THREE.SphereGeometry(data.radius * 0.5, 16, 16);
-        const material = new THREE.MeshPhongMaterial({
-            map: textureLoader.load(data.texture),
-        });
-        const asteroid = new THREE.Mesh(geometry, material);
-        asteroid.name = name;
-        scene.add(asteroid);
-        planets[name] = asteroid; // Add asteroids to planets object for simplicity
-
-        createOrbit(name, data);
-        createLabel(name, data);
-    }
-}
-
-function startTour() {
-    touring = true;
-    tourTargets = Object.values(planets);
-    currentTourIndex = 0;
-    moveCameraToObject(tourTargets[currentTourIndex]);
-}
-
-function moveCameraToObject(object) {
-    const distance = object.geometry.parameters.radius * 5;
-    new TWEEN.Tween(camera.position)
-        .to({
-            x: object.position.x,
-            y: object.position.y,
-            z: object.position.z + distance
-        }, 2000)
-        .easing(TWEEN.Easing.Quadratic.InOut)
-        .start()
-        .onComplete(() => {
-            controls.target.copy(object.position);
-            if (touring) {
-                setTimeout(() => {
-                    currentTourIndex = (currentTourIndex + 1) % tourTargets.length;
-                    moveCameraToObject(tourTargets[currentTourIndex]);
-                }, 5000);
-            }
-        });
-}
-
-function searchCelestialBody() {
-    const searchTerm = document.getElementById('search-input').value.toLowerCase();
-    const foundObject = Object.values(planets).find(planet => planet.name.toLowerCase() === searchTerm);
-    if (foundObject) {
-        selectedObject = foundObject;
-        moveCameraToObject(foundObject);
-    } else {
-        alert('Celestial body not found!');
-    }
-}
-
-function animate() {
-    requestAnimationFrame(animate);
-
-    TWEEN.update();
-
-    const delta = clock.getDelta();
-    simulationTime += delta * timeSpeed;
-
-    updateCelestialBodies();
-    updateInfoPanel();
-
-    controls.update();
-    renderer.render(scene, camera);
-}
-
-// ... [Rest of the code remains largely the same] ...
-
-init();
-animate();
