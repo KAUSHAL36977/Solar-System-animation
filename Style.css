@@ -67,35 +67,47 @@ button:hover {
     background-color: #45a049;
 }
 
-.planet-label {
-    color: #fff;
-    font-size: 12px;
-    padding: 2px 5px;
-    background-color: rgba(0, 0, 0, 0.5);
-    border-radius: 3px;
-    pointer-events: none;
+#simulation-info, #scale-comparison, #moon-phase {
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 15px;
+    border-radius: 5px;
+    max-width: 300px;
 }
 
 #simulation-info {
-    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+#scale-comparison {
     bottom: 10px;
-    right: 10px;
-    background-color: rgba(0, 0, 0, 0.7);
-    padding: 10px;
-    border-radius: 5px;
+    left: 50%;
+    transform: translateX(-50%);
 }
 
-.dg.ac {
-    z-index: 1000 !important;
+#moon-phase {
+    top: 70px;
+    left: 10px;
 }
 
-@media (max-width: 600px) {
-    #controls {
-        flex-direction: column;
-    }
+#moon-phase-display {
+    width: 100px;
+    height: 100px;
+    background-color: #DDDDDD;
+    border-radius: 50%;
+    margin: 10px auto;
+}
 
-    #search-container {
-        flex-direction: column;
-        align-items: flex-end;
-    }
+#comparison-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    height: 100px;
+}
+
+#comparison-container div {
+    border: 1px solid white;
+    border-radius: 50%;
 }
