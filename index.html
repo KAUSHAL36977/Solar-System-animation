@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced 3D Solar System Simulation</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>3D Solar System Animation</title>
+    <link rel="stylesheet" href="Style.css">
 </head>
 <body>
     <div id="canvas-container"></div>
@@ -20,7 +20,6 @@
         <button id="start-tour">Start Tour</button>
         <button id="toggle-planet-view">View from Planet</button>
         <button id="toggle-habitable-zone">Toggle Habitable Zone</button>
-        <button id="show-timeline">Show Timeline</button>
     </div>
     <div id="search-container">
         <input type="text" id="search-input" placeholder="Search celestial body">
@@ -30,20 +29,12 @@
         <div id="simulation-time"></div>
         <div id="simulation-speed"></div>
     </div>
-    <div id="timeline-container">
-        <h3>Space Exploration Timeline</h3>
-        <ul id="timeline-events"></ul>
-    </div>
-    <div id="mission-info">
-        <h3>Active Space Missions</h3>
-        <ul id="mission-list"></ul>
-    </div>
     <div id="scale-comparison">
         <h3>Planet Size Comparison</h3>
         <div id="comparison-container"></div>
     </div>
     <div id="moon-phase">
-        <h3>Moon Phase</h3>
+        <h3>Earth's Moon Phase</h3>
         <div id="moon-phase-display"></div>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
