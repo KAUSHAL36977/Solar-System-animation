@@ -5,26 +5,214 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>3D Solar System</title>
-    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #000;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+
+        #solar-system {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            transform-style: preserve-3d;
+            animation: rotate 100s infinite linear;
+        }
+
+        .celestial-body, .planet, .moon {
+            position: absolute;
+            border-radius: 50%;
+            transform-style: preserve-3d;
+            transition: transform 0.2s;
+        }
+
+        #sun {
+            width: 80px;
+            height: 80px;
+            background-color: #FDB813;
+            box-shadow: 0 0 60px #FDB813;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .planet {
+            animation: orbit linear infinite;
+        }
+
+        #mercury { width: 10px; height: 10px; background-color: #B5B5B5; }
+        #venus { width: 15px; height: 15px; background-color: #FFC649; }
+        #earth { width: 16px; height: 16px; background-color: #6B93D6; }
+        #mars { width: 14px; height: 14px; background-color: #C1440E; }
+        #jupiter { width: 36px; height: 36px; background-color: #C9B5A0; }
+        #saturn { width: 30px; height: 30px; background-color: #F4D4A9; }
+        #uranus { width: 26px; height: 26px; background-color: #CAE9FF; }
+        #neptune { width: 24px; height: 24px; background-color: #5B5DDF; }
+        #pluto { width: 8px; height: 8px; background-color: #FBF2E1; }
+
+        #moon {
+            width: 4px;
+            height: 4px;
+            background-color: #D0D0D0;
+            animation: orbit 2s linear infinite;
+        }
+
+        #saturn-rings {
+            position: absolute;
+            width: 60px;
+            height: 10px;
+            border: 2px solid rgba(210, 180, 140, 0.8);
+            border-radius: 50%;
+            transform: rotateX(75deg);
+        }
+
+        #asteroid-belt {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 400px;
+            height: 400px;
+            border: 1px dotted #555;
+            border-radius: 50%;
+            transform: translate(-50%, -50%) rotateX(60deg);
+        }
+
+        .tooltip {
+            position: absolute;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px;
+            border-radius: 5px;
+            font-size: 12px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .star {
+            position: absolute;
+            background-color: white;
+            width: 1px;
+            height: 1px;
+            border-radius: 50%;
+        }
+
+        @keyframes orbit {
+            from { transform: rotateY(0deg) translateX(100px) rotateY(0deg); }
+            to { transform: rotateY(360deg) translateX(100px) rotateY(-360deg); }
+        }
+
+        @keyframes rotate {
+            from { transform: rotateX(-60deg) rotateY(0deg); }
+            to { transform: rotateX(-60deg) rotateY(360deg); }
+        }
+    </style>
 </head>
 <body>
     <div id="solar-system">
-        <div id="sun" class="celestial-body"></div>
-        <div id="mercury" class="planet"></div>
-        <div id="venus" class="planet"></div>
-        <div id="earth" class="planet">
-            <div id="moon" class="moon"></div>
+        <div id="sun" class="celestial-body" data-name="Sun"></div>
+        <div id="mercury" class="planet" data-name="Mercury"></div>
+        <div id="venus" class="planet" data-name="Venus"></div>
+        <div id="earth" class="planet" data-name="Earth">
+            <div id="moon" class="moon" data-name="Moon"></div>
         </div>
-        <div id="mars" class="planet"></div>
+        <div id="mars" class="planet" data-name="Mars"></div>
         <div id="asteroid-belt"></div>
-        <div id="jupiter" class="planet"></div>
-        <div id="saturn" class="planet">
-            <div class="ring"></div>
+        <div id="jupiter" class="planet" data-name="Jupiter"></div>
+        <div id="saturn" class="planet" data-name="Saturn">
+            <div id="saturn-rings"></div>
         </div>
-        <div id="uranus" class="planet"></div>
-        <div id="neptune" class="planet"></div>
-        <div id="pluto" class="planet"></div>
+        <div id="uranus" class="planet" data-name="Uranus"></div>
+        <div id="neptune" class="planet" data-name="Neptune"></div>
+        <div id="pluto" class="planet" data-name="Pluto"></div>
     </div>
-    <script src="script.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const solarSystem = document.getElementById('solar-system');
+            const planets = document.querySelectorAll('.planet, .celestial-body');
+            const asteroidBelt = document.getElementById('asteroid-belt');
+
+            // Set initial positions and orbits
+            planets.forEach((planet, index) => {
+                const orbitRadius = 100 + index * 50;
+                planet.style.animation = `orbit ${10 + index * 5}s linear infinite`;
+                planet.style.transform = `rotateY(${Math.random() * 360}deg) translateX(${orbitRadius}px) rotateY(${Math.random() * 360}deg)`;
+            });
+
+            // Create asteroids
+            for (let i = 0; i < 200; i++) {
+                const asteroid = document.createElement('div');
+                asteroid.className = 'asteroid';
+                asteroid.style.width = asteroid.style.height = Math.random() * 2 + 1 + 'px';
+                asteroid.style.background = '#555';
+                asteroid.style.position = 'absolute';
+                asteroid.style.borderRadius = '50%';
+                const angle = Math.random() * Math.PI * 2;
+                const distance = 200 + Math.random() * 50;
+                asteroid.style.left = 50 + Math.cos(angle) * distance + '%';
+                asteroid.style.top = 50 + Math.sin(angle) * distance + '%';
+                asteroidBelt.appendChild(asteroid);
+            }
+
+            // Create stars
+            for (let i = 0; i < 200; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                document.body.appendChild(star);
+            }
+
+            // Add tooltips
+            planets.forEach(planet => {
+                const tooltip = document.createElement('div');
+                tooltip.className = 'tooltip';
+                tooltip.textContent = planet.dataset.name;
+                planet.appendChild(tooltip);
+
+                planet.addEventListener('mouseover', () => {
+                    tooltip.style.opacity = 1;
+                });
+
+                planet.addEventListener('mouseout', () => {
+                    tooltip.style.opacity = 0;
+                });
+            });
+
+            // Add mouse interaction
+            let isDragging = false;
+            let previousMousePosition = { x: 0, y: 0 };
+
+            solarSystem.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                previousMousePosition = { x: e.clientX, y: e.clientY };
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+
+                const deltaMove = {
+                    x: e.clientX - previousMousePosition.x,
+                    y: e.clientY - previousMousePosition.y
+                };
+
+                const rotationSpeed = 0.5;
+                solarSystem.style.transform = `rotateX(${-deltaMove.y * rotationSpeed}deg) rotateY(${deltaMove.x * rotationSpeed}deg)`;
+
+                previousMousePosition = { x: e.clientX, y: e.clientY };
+            });
+
+            document.addEventListener('mouseup', () => {
+                isDragging = false;
+            });
+        });
+    </script>
 </body>
 </html>
