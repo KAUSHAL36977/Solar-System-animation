@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enhanced 2D Solar System</title>
+    <title>Interactive 2D Solar System</title>
     <style>
         body {
             margin: 0;
@@ -15,6 +15,7 @@
             background-color: #000;
             overflow: hidden;
             font-family: Arial, sans-serif;
+            color: white;
         }
 
         #solar-system {
@@ -26,6 +27,7 @@
         .celestial-body, .planet {
             position: absolute;
             border-radius: 50%;
+            cursor: pointer;
         }
 
         #asteroid-belt {
@@ -59,6 +61,29 @@
             width: 1px;
             height: 1px;
         }
+
+        #controls {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 1000;
+        }
+
+        #info-panel {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 5px;
+            max-width: 300px;
+            display: none;
+        }
+
+        button, input {
+            margin: 5px;
+            padding: 5px;
+        }
     </style>
 </head>
 <body>
@@ -75,6 +100,12 @@
         <div id="neptune" class="planet" data-name="Neptune"></div>
         <div id="pluto" class="planet" data-name="Pluto"></div>
     </div>
+    <div id="controls">
+        <button id="play-pause">Pause</button>
+        <input type="range" id="speed-control" min="0.1" max="5" step="0.1" value="1">
+        <label for="speed-control">Speed: <span id="speed-value">1x</span></label>
+    </div>
+    <div id="info-panel"></div>
     <script src="script.js"></script>
 </body>
 </html>
