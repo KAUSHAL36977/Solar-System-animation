@@ -5,7 +5,7 @@ import { CSS2DRenderer, CSS2DObject } from 'https://cdnjs.cloudflare.com/ajax/li
 
 // Set up scene, camera, and renderer
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2000);
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.getElementById('canvas-container').appendChild(renderer.domElement);
@@ -21,24 +21,21 @@ document.getElementById('canvas-container').appendChild(labelRenderer.domElement
 camera.position.set(0, 50, 100);
 const controls = new OrbitControls(camera, renderer.domElement);
 
-// Create a starry background
-function createStars() {
-    const geometry = new THREE.BufferGeometry();
-    const vertices = [];
-    for (let i = 0; i < 10000; i++) {
-        vertices.push(
-            THREE.MathUtils.randFloatSpread(2000),
-            THREE.MathUtils.randFloatSpread(2000),
-            THREE.MathUtils.randFloatSpread(2000)
-        );
-    }
-    geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
-    const material = new THREE.PointsMaterial({ color: 0xFFFFFF, size: 0.1 });
-    const stars = new THREE.Points(geometry, material);
-    scene.add(stars);
+// Create skybox
+function createSkybox() {
+    const loader = new THREE.CubeTextureLoader();
+    const texture = loader.load([
+        'https://space-assets-1.s3.amazonaws.com/skybox/px.jpg',
+        'https://space-assets-1.s3.amazonaws.com/skybox/nx.jpg',
+        'https://space-assets-1.s3.amazonaws.com/skybox/py.jpg',
+        'https://space-assets-1.s3.amazonaws.com/skybox/ny.jpg',
+        'https://space-assets-1.s3.amazonaws.com/skybox/pz.jpg',
+        'https://space-assets-1.s3.amazonaws.com/skybox/nz.jpg',
+    ]);
+    scene.background = texture;
 }
 
-createStars();
+createSkybox();
 
 // Add lighting
 const ambientLight = new THREE.AmbientLight(0x404040);
@@ -57,6 +54,7 @@ const textures = {
     Mars: textureLoader.load('https://space-assets-1.s3.amazonaws.com/mars.jpg'),
     Jupiter: textureLoader.load('https://space-assets-1.s3.amazonaws.com/jupiter.jpg'),
     Saturn: textureLoader.load('https://space-assets-1.s3.amazonaws.com/saturn.jpg'),
+    SaturnRings: textureLoader.load('https://space-assets-1.s3.amazonaws.com/saturn_rings.png'),
     Uranus: textureLoader.load('https://space-assets-1.s3.amazonaws.com/uranus.jpg'),
     Neptune: textureLoader.load('https://space-assets-1.s3.amazonaws.com/neptune.jpg'),
     Pluto: textureLoader.load('https://space-assets-1.s3.amazonaws.com/pluto.jpg')
@@ -106,6 +104,20 @@ celestialBodies.forEach(body => {
         pointLight.position.copy(mesh.position);
     }
     
+    // Add Saturn's rings
+    if (body.name === 'Saturn') {
+        const ringGeometry = new THREE.RingGeometry(body.radius * 1.2, body.radius * 2, 64);
+        const ringMaterial = new THREE.MeshBasicMaterial({ 
+            map: textures.SaturnRings, 
+            side: THREE.DoubleSide,
+            transparent: true,
+            opacity: 0.8
+        });
+        const rings = new THREE.Mesh(ringGeometry, ringMaterial);
+        rings.rotation.x = Math.PI / 2;
+        mesh.add(rings);
+    }
+    
     scene.add(mesh);
     planets.set(body.name, { mesh, orbitRadius: body.orbitRadius, rotationSpeed: body.rotationSpeed, description: body.description });
 });
@@ -129,9 +141,15 @@ for (let i = 0; i < 2000; i++) {
 
 scene.add(asteroidBelt);
 
+// Improve lighting
+const sunLight = new THREE.PointLight(0xFFFFFF, 2, 300);
+sunLight.position.set(0, 0, 0);
+scene.add(sunLight);
+
 // UI Controls
 let showOrbits = true;
 let showLabels = true;
+let showAsteroids = true;
 let realScale = false;
 let simulationSpeed = 1;
 let viewFromEarth = false;
@@ -150,6 +168,11 @@ document.getElementById('toggle-labels').addEventListener('click', () => {
     });
 });
 
+document.getElementById('toggle-asteroids').addEventListener('click', () => {
+    showAsteroids = !showAsteroids;
+    asteroidBelt.visible = showAsteroids;
+});
+
 document.getElementById('toggle-scale').addEventListener('click', () => {
     realScale = !realScale;
     updatePlanetScale();
@@ -164,11 +187,20 @@ document.getElementById('simulation-speed-input').addEventListener('input', (eve
     document.getElementById('simulation-speed').textContent = `Simulation Speed: ${simulationSpeed.toFixed(1)}x`;
 });
 
+document.getElementById('reset-camera').addEventListener('click', () => {
+    camera.position.set(0, 50, 100);
+    camera.lookAt(scene.position);
+    controls.reset();
+});
+
 function updatePlanetScale() {
     celestialBodies.forEach(body => {
         const planet = planets.get(body.name);
         const scale = realScale ? body.radius : body.radius * (body.name === 'Sun' ? 1 : 3);
         planet.mesh.scale.setScalar(scale);
+        if (body.name === 'Saturn') {
+            planet.mesh.children[0].scale.setScalar(1 / scale);
+        }
     });
 }
 
@@ -231,6 +263,10 @@ function animate() {
             planet.mesh.position.z = Math.sin(angle) * planet.orbitRadius;
         }
         planet.mesh.rotation.y += 0.01 * planet.rotationSpeed * simulationSpeed;
+        
+        if (name === 'Saturn') {
+            planet.mesh.children[0].rotation.z += 0.001 * simulationSpeed;
+        }
     });
 
     asteroidBelt.rotation.y += 0.0001 * simulationSpeed;
