@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,13 +5,60 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Detailed 3D Solar System Animation</title>
     <link rel="stylesheet" href="Style.css">
+    <style>
+        /* Inline styles for the loading spinner */
+        #loading-spinner {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: none; /* Hidden by default */
+        }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 8px solid rgba(255, 255, 255, 0.3);
+            border-top: 8px solid #4CAF50;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        /* Styles for the settings panel */
+        #settings-panel {
+            position: absolute;
+            top: 50px;
+            right: 10px;
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 5px;
+            display: none; /* Hidden by default */
+            z-index: 10; /* Ensure settings are above canvas */
+        }
+        #settings-panel h3 {
+            margin-top: 0;
+            color: #4CAF50;
+        }
+        #settings-panel label {
+            display: block;
+            margin: 5px 0;
+        }
+    </style>
 </head>
 <body>
+    <div id="loading-spinner">
+        <div class="spinner"></div>
+    </div>
+    
     <div id="canvas-container"></div>
+
     <div id="info-panel">
         <h2 id="celestial-name"></h2>
         <div id="celestial-description"></div>
     </div>
+
     <div id="controls">
         <button id="toggle-orbits">Toggle Orbits</button>
         <button id="toggle-labels">Toggle Labels</button>
@@ -20,28 +66,44 @@
         <button id="start-tour">Start Tour</button>
         <button id="toggle-planet-view">View from Earth</button>
         <button id="toggle-habitable-zone">Toggle Habitable Zone</button>
+        <button id="toggle-settings">Settings</button> <!-- New Settings Button -->
     </div>
+
     <div id="search-container">
-        <input type="text" id="search-input" placeholder="Search celestial body">
-        <button id="search-button">Search</button>
+        <input type="text" id="search-input" placeholder="Search celestial body" aria-label="Search celestial body">
+        <button id="search-button" aria-label="Search">Search</button>
     </div>
+
     <div id="simulation-info">
         <div id="simulation-time"></div>
         <div id="simulation-speed"></div>
     </div>
+
     <div id="scale-comparison">
         <h3>Planet Size Comparison</h3>
         <div id="comparison-container"></div>
     </div>
+
     <div id="moon-phase">
         <h3>Earth's Moon Phase</h3>
         <div id="moon-phase-display"></div>
     </div>
+
+    <!-- New Settings Panel -->
+    <div id="settings-panel">
+        <h3>Settings</h3>
+        <label for="simulation-speed-input">Simulation Speed:</label>
+        <input type="range" id="simulation-speed-input" min="0.1" max="5" step="0.1" value="1">
+        <label for="view-distance-input">View Distance:</label>
+        <input type="range" id="view-distance-input" min="10" max="1000" step="10" value="100">
+        <button id="apply-settings">Apply</button>
+    </div>
+
+    <footer id="footer">
+        <p>© 2023 Solar System Simulation. All rights reserved.</p>
+        <p><a href="https://github.com/your-repo" target="_blank" rel="noopener noreferrer">View Source Code on GitHub</a></p>
+    </footer>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.7/dat.gui.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/renderers/CSS2DRenderer.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
-    <script src="script.js"></script>
-</body>
-</html>
+    <script src="https://
