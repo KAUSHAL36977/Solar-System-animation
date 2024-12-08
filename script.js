@@ -12,19 +12,13 @@ class SolarSystemSimulation {
     constructor() {
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        this.renderer = new THREE.WebGLRenderer({ 
-            antialias: true,
-            powerPreference: "high-performance"
-        });
-        
+        this.renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
         this.composer = new EffectComposer(this.renderer);
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
         this.stats = new Stats();
-        
         this.planets = new Map();
         this.labels = new Map();
         this.orbits = new Map();
-        
         this.init();
     }
 
@@ -40,16 +34,12 @@ class SolarSystemSimulation {
     setupScene() {
         this.scene.background = new THREE.Color(0x000000);
         this.camera.position.set(0, 50, 100);
-        
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        
+
         // Setup CSS2D renderer
         this.labelRenderer = new CSS2DRenderer();
         this.labelRenderer.setSize(window.innerWidth, window.innerHeight);
-        this.labelRenderer.domElement.style.position = 'absolute';
-        this.labelRenderer.domElement.style.top = '0';
-        
         document.getElementById('canvas-container').appendChild(this.renderer.domElement);
         document.getElementById('canvas-container').appendChild(this.labelRenderer.domElement);
         document.body.appendChild(this.stats.dom);
@@ -57,10 +47,7 @@ class SolarSystemSimulation {
 
     setupPostProcessing() {
         const renderPass = new RenderPass(this.scene, this.camera);
-        const bloomPass = new UnrealBloomPass(
-            new THREE.Vector2(window.innerWidth, window.innerHeight),
-            1.5, 0.4, 0.85
-        );
+        const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
         const fxaaPass = new ShaderPass(FXAAShader);
         
         this.composer.addPass(renderPass);
@@ -78,7 +65,7 @@ class SolarSystemSimulation {
             normalMap: textureLoader.load(`/textures/${data.name.toLowerCase()}_normal.jpg`),
             roughnessMap: textureLoader.load(`/textures/${data.name.toLowerCase()}_roughness.jpg`)
         });
-        
+
         const planet = new THREE.Mesh(geometry, material);
         
         // Create orbit
@@ -89,45 +76,46 @@ class SolarSystemSimulation {
             opacity: 0.2,
             side: THREE.DoubleSide
         });
+        
         const orbit = new THREE.Mesh(orbitGeometry, orbitMaterial);
         orbit.rotation.x = Math.PI / 2;
-        
+
         // Create label
         const labelDiv = document.createElement('div');
         labelDiv.className = 'celestial-label';
         labelDiv.textContent = data.name;
+        
         const label = new CSS2DObject(labelDiv);
         
+        // Add to scene
         this.scene.add(planet);
         this.scene.add(orbit);
         this.scene.add(label);
-        
+
+        // Store references
         this.planets.set(data.name, planet);
         this.orbits.set(data.name, orbit);
         this.labels.set(data.name, label);
-        
+
         return { planet, orbit, label };
     }
 
     animate() {
-        requestAnimationFrame(this.animate.bind(this));
-        
-        this.planets.forEach((planet, name) => {
-            const data = celestialBodies.find(body => body.name === name);
-            const time = performance.now() * 0.001;
-            
-            planet.rotation.y += 0.01;
-            planet.position.x = Math.cos(time * 0.5) * data.orbitRadius;
-            planet.position.z = Math.sin(time * 0.5) * data.orbitRadius;
-            
-            const label = this.labels.get(name);
-            label.position.copy(planet.position);
-            label.position.y += data.radius + 2;
-        });
-        
-        this.controls.update();
-        this.composer.render();
-        this.labelRenderer.render(this.scene, this.camera);
-        this.stats.update();
+       requestAnimationFrame(this.animate.bind(this));
+       const time = performance.now() * 0.001;
+       this.planets.forEach((planet, name) => {
+           const data = celestialBodies.find(body => body.name === name); // Ensure celestialBodies is defined
+           planet.rotation.y += 0.01;
+           planet.position.x = Math.cos(time * 0.5) * data.orbitRadius;
+           planet.position.z = Math.sin(time * 0.5) * data.orbitRadius;
+
+           const label = this.labels.get(name);
+           label.position.copy(planet.position).setY(label.position.y + data.radius + 2); // Adjust label position
+       });
+
+       this.controls.update();
+       this.composer.render();
+       this.labelRenderer.render(this.scene, this.camera);
+       this.stats.update();
     }
 }
