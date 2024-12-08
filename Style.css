@@ -113,3 +113,89 @@ button:hover {
     max-width: 300px;
     z-index: 10;
 }
+
+
+/* Base styles */
+ol {
+  all: unset;
+  aspect-ratio: 1 / 1;
+  container-type: inline-size;
+  display: grid;
+  width: 100%;
+  perspective: 800px; /* Adds depth for 3D */
+}
+
+li {
+  grid-area: 1 / -1;
+  place-self: center;
+  transform-style: preserve-3d;
+}
+
+/* Trajectories and 3D tilt */
+li::after {
+  aspect-ratio: 1 / 1;
+  background: var(--b);
+  border-radius: 50%;
+  content: '';
+  display: block;
+  width: var(--w, 2cqi);
+  transform: rotateX(30deg); /* Tilt orbits in 3D */
+  animation: rotate var(--t, 20s) linear infinite;
+  offset-path: content-box;
+}
+
+/* Planet-specific styles */
+.mercury {
+  --b: radial-gradient(circle, #c2c2c2 0%, #8a8a8a 100%);
+  --w: 2.0526cqi;
+  --t: 3s;
+}
+
+.venus {
+  --b: radial-gradient(circle, #f4d03f 0%, #c39c43 100%);
+  --w: 2.6053cqi;
+  --t: 5s;
+}
+
+.earth {
+  --b: radial-gradient(circle, #3a82f7 0%, #2f9e44 80%, #1a5e20 100%);
+  --w: 3.1579cqi;
+  --t: 8s;
+}
+
+.mars {
+  --b: radial-gradient(circle, #e57373 0%, #af4448 100%);
+  --w: 3.7105cqi;
+  --t: 10s;
+}
+
+.jupiter {
+  --b: radial-gradient(circle, #d4a373 0%, #b36d32 50%, #f4e7d3 100%);
+  --w: 4.8158cqi;
+  --t: 12s;
+}
+
+.saturn {
+  --b: radial-gradient(circle, #e6dba0 0%, #c2a13e 100%);
+  --w: 5.3684cqi;
+  --t: 14s;
+}
+
+.uranus {
+  --b: radial-gradient(circle, #7de3f4 0%, #3ba0b5 100%);
+  --w: 4.2632cqi;
+  --t: 16s;
+}
+
+.neptune {
+  --b: radial-gradient(circle, #4c6ef5 0%, #1b3b8c 100%);
+  --w: 6cqi;
+  --t: 20s;
+}
+
+/* Animation */
+@keyframes rotate {
+  to {
+    offset-distance: 100%;
+  }
+}
