@@ -1,225 +1,133 @@
-import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r132/three.module.js';
-import { OrbitControls } from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r132/examples/jsm/controls/OrbitControls.js';
-import { EffectComposer } from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r132/examples/jsm/postprocessing/EffectComposer.js';
-import { RenderPass } from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r132/examples/jsm/postprocessing/RenderPass.js';
-import { UnrealBloomPass } from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r132/examples/jsm/postprocessing/UnrealBloomPass.js';
-import { ShaderPass } from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r132/examples/jsm/postprocessing/ShaderPass.js';
-import { FXAAShader } from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r132/examples/jsm/shaders/FXAAShader.js';
-import { CSS2DRenderer, CSS2DObject } from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r132/examples/jsm/renderers/CSS2DRenderer.js';
-import Stats from 'https://cdnjs.cloudflare.com/ajax/libs/stats.js/r17/Stats.min.js';
+import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
+import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass';
+import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass';
+import { FXAAShader } from 'three/examples/jsm/shaders/FXAAShader';
+import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer';
+import Stats from 'stats.js';
 
-// DOM Element References
-const loadingSpinner = document.getElementById('loading-spinner');
-const canvasContainer = document.getElementById('canvas-container');
-const infoPanel = document.getElementById('info-panel');
-const celestialNameElement = document.getElementById('celestial-name');
-const celestialDescriptionElement = document.getElementById('celestial-description');
-
-// Control Button References
-const toggleOrbitsBtn = document.getElementById('toggle-orbits');
-const toggleLabelsBtn = document.getElementById('toggle-labels');
-const toggleAsteroidsBtn = document.getElementById('toggle-asteroids');
-const toggleScaleBtn = document.getElementById('toggle-scale');
-const togglePlanetViewBtn = document.getElementById('toggle-planet-view');
-const resetCameraBtn = document.getElementById('reset-camera');
-const startTourBtn = document.getElementById('start-tour');
-const toggleHabitableZoneBtn = document.getElementById('toggle-habitable-zone');
-const toggleSettingsBtn = document.getElementById('toggle-settings');
-
-// Search Feature References
-const searchInput = document.getElementById('search-input');
-const searchButton = document.getElementById('search-button');
-
-// Simulation Information References
-const simulationTimeElement = document.getElementById('simulation-time');
-const simulationSpeedElement = document.getElementById('simulation-speed');
-
-// Scene Setup
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x000000); // Black background to match CSS
-
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.z = 100;
-
-const renderer = new THREE.WebGLRenderer({ 
-    antialias: true, 
-    powerPreference: "high-performance" 
-});
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setPixelRatio(window.devicePixelRatio > 1 ? 2 : 1);
-canvasContainer.appendChild(renderer.domElement);
-
-// CSS2D Renderer for Labels
-const labelRenderer = new CSS2DRenderer();
-labelRenderer.setSize(window.innerWidth, window.innerHeight);
-labelRenderer.domElement.style.position = 'absolute';
-labelRenderer.domElement.style.top = '0px';
-canvasContainer.appendChild(labelRenderer.domElement);
-
-// Lighting
-const ambientLight = new THREE.AmbientLight(0x404040, 0.5);
-scene.add(ambientLight);
-
-const sunLight = new THREE.PointLight(0xffffff, 1, 500);
-sunLight.position.set(0, 0, 0);
-scene.add(sunLight);
-
-// Celestial Bodies Configuration
-const celestialBodies = [
-    { 
-        name: 'Mercury', 
-        cssClass: 'mercury',
-        radius: 0.383, 
-        orbitRadius: 20, 
-        description: 'The smallest planet in the Solar System and closest to the Sun.'
-    },
-    { 
-        name: 'Venus', 
-        cssClass: 'venus',
-        radius: 0.949, 
-        orbitRadius: 30, 
-        description: 'Earth's closest planetary neighbor, known for its extreme temperatures.'
-    },
-    { 
-        name: 'Earth', 
-        cssClass: 'earth',
-        radius: 1, 
-        orbitRadius: 40, 
-        description: 'The only known astronomical object to harbor life.'
-    },
-    { 
-        name: 'Mars', 
-        cssClass: 'mars',
-        radius: 0.532, 
-        orbitRadius: 50, 
-        description: 'Often called the "Red Planet" due to its reddish appearance.'
-    },
-    { 
-        name: 'Jupiter', 
-        cssClass: 'jupiter',
-        radius: 11.21, 
-        orbitRadius: 70, 
-        description: 'The largest planet in the Solar System, a gas giant.'
-    },
-    { 
-        name: 'Saturn', 
-        cssClass: 'saturn',
-        radius: 9.45, 
-        orbitRadius: 90, 
-        description: 'Known for its prominent ring system.'
-    },
-    { 
-        name: 'Uranus', 
-        cssClass: 'uranus',
-        radius: 4, 
-        orbitRadius: 110, 
-        description: 'An ice giant with a unique rotational tilt.'
-    },
-    { 
-        name: 'Neptune', 
-        cssClass: 'neptune',
-        radius: 3.88, 
-        orbitRadius: 130, 
-        description: 'The windiest planet in the Solar System.'
-    }
-];
-
-// Create Planets
-const createPlanets = () => {
-    celestialBodies.forEach(body => {
-        const geometry = new THREE.SphereGeometry(body.radius, 32, 32);
-        const material = new THREE.MeshPhongMaterial({ 
-            color: getComputedStyle(document.querySelector(`.${body.cssClass}`)).background 
+class SolarSystemSimulation {
+    constructor() {
+        this.scene = new THREE.Scene();
+        this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        this.renderer = new THREE.WebGLRenderer({ 
+            antialias: true,
+            powerPreference: "high-performance"
         });
-        const mesh = new THREE.Mesh(geometry, material);
         
-        // Orbit creation
-        const orbitGeometry = new THREE.RingGeometry(body.orbitRadius, body.orbitRadius + 0.2, 64);
-        const orbitMaterial = new THREE.MeshBasicMaterial({ 
-            color: 0xffffff, 
-            side: THREE.DoubleSide, 
-            transparent: true, 
-            opacity: 0.2 
+        this.composer = new EffectComposer(this.renderer);
+        this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+        this.stats = new Stats();
+        
+        this.planets = new Map();
+        this.labels = new Map();
+        this.orbits = new Map();
+        
+        this.init();
+    }
+
+    init() {
+        this.setupScene();
+        this.setupLighting();
+        this.setupPostProcessing();
+        this.createPlanets();
+        this.setupEventListeners();
+        this.animate();
+    }
+
+    setupScene() {
+        this.scene.background = new THREE.Color(0x000000);
+        this.camera.position.set(0, 50, 100);
+        
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        
+        // Setup CSS2D renderer
+        this.labelRenderer = new CSS2DRenderer();
+        this.labelRenderer.setSize(window.innerWidth, window.innerHeight);
+        this.labelRenderer.domElement.style.position = 'absolute';
+        this.labelRenderer.domElement.style.top = '0';
+        
+        document.getElementById('canvas-container').appendChild(this.renderer.domElement);
+        document.getElementById('canvas-container').appendChild(this.labelRenderer.domElement);
+        document.body.appendChild(this.stats.dom);
+    }
+
+    setupPostProcessing() {
+        const renderPass = new RenderPass(this.scene, this.camera);
+        const bloomPass = new UnrealBloomPass(
+            new THREE.Vector2(window.innerWidth, window.innerHeight),
+            1.5, 0.4, 0.85
+        );
+        const fxaaPass = new ShaderPass(FXAAShader);
+        
+        this.composer.addPass(renderPass);
+        this.composer.addPass(bloomPass);
+        this.composer.addPass(fxaaPass);
+    }
+
+    createPlanet(data) {
+        const textureLoader = new THREE.TextureLoader();
+        
+        // Create planet mesh
+        const geometry = new THREE.SphereGeometry(data.radius, 64, 64);
+        const material = new THREE.MeshStandardMaterial({
+            map: textureLoader.load(`/textures/${data.name.toLowerCase()}.jpg`),
+            normalMap: textureLoader.load(`/textures/${data.name.toLowerCase()}_normal.jpg`),
+            roughnessMap: textureLoader.load(`/textures/${data.name.toLowerCase()}_roughness.jpg`)
+        });
+        
+        const planet = new THREE.Mesh(geometry, material);
+        
+        // Create orbit
+        const orbitGeometry = new THREE.RingGeometry(data.orbitRadius, data.orbitRadius + 0.1, 128);
+        const orbitMaterial = new THREE.MeshBasicMaterial({
+            color: 0xffffff,
+            transparent: true,
+            opacity: 0.2,
+            side: THREE.DoubleSide
         });
         const orbit = new THREE.Mesh(orbitGeometry, orbitMaterial);
         orbit.rotation.x = Math.PI / 2;
-        scene.add(orbit);
-
-        scene.add(mesh);
-    });
-};
-
-// Interaction Handlers
-const setupInteractions = () => {
-    // Search functionality
-    searchButton.addEventListener('click', () => {
-        const searchTerm = searchInput.value.toLowerCase();
-        const foundBody = celestialBodies.find(body => 
-            body.name.toLowerCase() === searchTerm
-        );
         
-        if (foundBody) {
-            showBodyInfo(foundBody);
-        }
-    });
-
-    // Toggle buttons
-    toggleOrbitsBtn.addEventListener('click', () => {
-        // Implement orbit visibility toggle
-    });
-
-    toggleLabelsBtn.addEventListener('click', () => {
-        // Implement label visibility toggle
-    });
-};
-
-// Information Display
-const showBodyInfo = (body) => {
-    celestialNameElement.textContent = body.name;
-    celestialDescriptionElement.textContent = body.description;
-    infoPanel.style.display = 'block';
-};
-
-// Animation Loop
-const animate = () => {
-    requestAnimationFrame(animate);
-    
-    // Rotate and orbit planets
-    celestialBodies.forEach((body, index) => {
-        const angle = Date.now() * 0.0001 * (index + 1);
-        const mesh = scene.children.find(child => 
-            child.isMesh && 
-            child.geometry.parameters.radius === body.radius
-        );
+        // Create label
+        const labelDiv = document.createElement('div');
+        labelDiv.className = 'celestial-label';
+        labelDiv.textContent = data.name;
+        const label = new CSS2DObject(labelDiv);
         
-        if (mesh) {
-            mesh.position.x = Math.cos(angle) * body.orbitRadius;
-            mesh.position.z = Math.sin(angle) * body.orbitRadius;
-        }
-    });
+        this.scene.add(planet);
+        this.scene.add(orbit);
+        this.scene.add(label);
+        
+        this.planets.set(data.name, planet);
+        this.orbits.set(data.name, orbit);
+        this.labels.set(data.name, label);
+        
+        return { planet, orbit, label };
+    }
 
-    renderer.render(scene, camera);
-    labelRenderer.render(scene, camera);
-};
-
-// Initialization
-const init = () => {
-    createPlanets();
-    setupInteractions();
-    animate();
-
-    // Hide loading spinner
-    loadingSpinner.style.display = 'none';
-};
-
-// Responsive Handling
-window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    labelRenderer.setSize(window.innerWidth, window.innerHeight);
-});
-
-// Start the simulation
-init();
+    animate() {
+        requestAnimationFrame(this.animate.bind(this));
+        
+        this.planets.forEach((planet, name) => {
+            const data = celestialBodies.find(body => body.name === name);
+            const time = performance.now() * 0.001;
+            
+            planet.rotation.y += 0.01;
+            planet.position.x = Math.cos(time * 0.5) * data.orbitRadius;
+            planet.position.z = Math.sin(time * 0.5) * data.orbitRadius;
+            
+            const label = this.labels.get(name);
+            label.position.copy(planet.position);
+            label.position.y += data.radius + 2;
+        });
+        
+        this.controls.update();
+        this.composer.render();
+        this.labelRenderer.render(this.scene, this.camera);
+        this.stats.update();
+    }
+}
