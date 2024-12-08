@@ -1,12 +1,11 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Interactive 4K 3D Solar System Animation with dynamic controls, real-time simulation, and celestial body exploration.">
+    <meta name="description" content="Interactive 4K 3D Solar System Animation with dynamic controls, real-time simulation, and celestial body exploration">
     <title>4K 3D Solar System Animation</title>
-    <link rel="stylesheet" href="Style (1).css">
+    <link rel="stylesheet" href="solar-system.css">
     <style>
         /* Loading Spinner Styles */
         #loading-spinner {
@@ -14,7 +13,10 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            display: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
         }
         .spinner {
             width: 80px;
@@ -28,42 +30,6 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-
-        /* Settings Panel Styles */
-        #settings-panel {
-            position: fixed;
-            top: 10%;
-            right: 20px;
-            background-color: rgba(0, 0, 0, 0.9);
-            padding: 20px;
-            border-radius: 10px;
-            display: none;
-            z-index: 1000;
-        }
-        #settings-panel h3 {
-            color: #4CAF50;
-            margin-top: 0;
-        }
-        #settings-panel label {
-            font-size: 16px;
-            margin-top: 10px;
-            display: block;
-        }
-        #settings-panel input[type="range"] {
-            width: 100%;
-        }
-        #settings-panel button {
-            margin-top: 15px;
-            padding: 10px 20px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        #settings-panel button:hover {
-            background-color: #45a049;
-        }
     </style>
 </head>
 <body>
@@ -72,38 +38,60 @@
         <div class="spinner"></div>
     </div>
 
-    <!-- Canvas Container for 3D Scene -->
-    <div id="canvas-container" aria-label="Solar System Visualization"></div>
+    <!-- Solar System Visualization -->
+    <div class="solar-system" aria-label="Interactive Solar System">
+        <ol>
+            <!-- Planets with their respective classes -->
+            <li class="planet mercury" aria-label="Mercury"></li>
+            <li class="planet venus" aria-label="Venus"></li>
+            <li class="planet earth" aria-label="Earth"></li>
+            <li class="planet mars" aria-label="Mars"></li>
+            <li class="planet jupiter" aria-label="Jupiter"></li>
+            <li class="planet saturn" aria-label="Saturn"></li>
+            <li class="planet uranus" aria-label="Uranus"></li>
+            <li class="planet neptune" aria-label="Neptune"></li>
+        </ol>
+    </div>
+
+    <!-- Canvas Container for Additional 3D Elements -->
+    <div id="canvas-container" aria-label="Solar System 3D Visualization"></div>
 
     <!-- Info Panel for Celestial Body Details -->
     <div id="info-panel" aria-live="polite">
-        <h2 id="celestial-name"></h2>
-        <div id="celestial-description"></div>
+        <h2 id="celestial-name">Solar System Details</h2>
+        <div id="celestial-description">
+            Explore the wonders of our solar system through this interactive visualization.
+        </div>
     </div>
 
-    <!-- Controls for Simulation -->
+    <!-- Simulation Controls -->
     <div id="controls" aria-label="Simulation Controls">
         <button id="toggle-orbits">Toggle Orbits</button>
         <button id="toggle-labels">Toggle Labels</button>
         <button id="toggle-asteroids">Toggle Asteroids</button>
         <button id="toggle-scale">Toggle Real Scale</button>
-        <button id="toggle-planet-view">Earth View</button>
+        <button id="toggle-planet-view">Planet View</button>
         <button id="reset-camera">Reset Camera</button>
         <button id="start-tour">Start Tour</button>
         <button id="toggle-habitable-zone">Habitable Zone</button>
         <button id="toggle-settings">Settings</button>
     </div>
 
-    <!-- Search Feature -->
+    <!-- Search Container -->
     <div id="search-container" aria-label="Search Celestial Bodies">
-        <input type="text" id="search-input" placeholder="Search celestial body" aria-label="Search celestial body">
+        <input 
+            type="text" 
+            id="search-input" 
+            placeholder="Search celestial body" 
+            aria-label="Search input for celestial bodies"
+        >
         <button id="search-button">Search</button>
     </div>
 
-    <!-- Simulation Info -->
+    <!-- Simulation Information -->
     <div id="simulation-info">
-        <div id="simulation-time"></div>
-        <div id="simulation-speed"></div>
+        <div id="simulation-time">Time: 00:00:00</div>
+        <div id="simulation-speed">Speed: 1x</div>
     </div>
 
     <!-- Planet Size Comparison -->
@@ -112,29 +100,56 @@
         <div id="comparison-container"></div>
     </div>
 
-    <!-- Earth's Moon Phase -->
+    <!-- Moon Phase Display -->
     <div id="moon-phase">
         <h3>Earth's Moon Phase</h3>
         <div id="moon-phase-display"></div>
     </div>
 
     <!-- Settings Panel -->
-    <div id="settings-panel" aria-label="Settings">
-        <h3>Settings</h3>
+    <div id="settings-panel" aria-label="Simulation Settings">
+        <h3>Simulation Settings</h3>
+        
         <label for="simulation-speed-input">Simulation Speed:</label>
-        <input type="range" id="simulation-speed-input" min="0.1" max="5" step="0.1" value="1" aria-label="Simulation Speed">
+        <input 
+            type="range" 
+            id="simulation-speed-input" 
+            min="0.1" 
+            max="5" 
+            step="0.1" 
+            value="1" 
+            aria-label="Adjust simulation speed"
+        >
+        
         <label for="view-distance-input">View Distance:</label>
-        <input type="range" id="view-distance-input" min="10" max="1000" step="10" value="100" aria-label="View Distance">
+        <input 
+            type="range" 
+            id="view-distance-input" 
+            min="10" 
+            max="1000" 
+            step="10" 
+            value="100" 
+            aria-label="Adjust view distance"
+        >
+        
         <button id="apply-settings">Apply Settings</button>
     </div>
 
     <!-- Footer -->
     <footer id="footer">
-        <p>© 2023 Solar System Simulation. All rights reserved.</p>
-        <p><a href="https://github.com/your-repo" target="_blank" rel="noopener noreferrer">View Source Code on GitHub</a></p>
+        <p>© 2024 Solar System Simulation. All rights reserved.</p>
+        <p>
+            <a 
+                href="https://github.com/your-username/solar-system-simulation" 
+                target="_blank" 
+                rel="noopener noreferrer"
+            >
+                View Source Code on GitHub
+            </a>
+        </p>
     </footer>
 
-    <!-- External Script -->
-    <script type="module" src="script (1).js"></script>
+    <!-- Main JavaScript Module -->
+    <script type="module" src="solar-system.js"></script>
 </body>
 </html>
