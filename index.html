@@ -3,26 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solar System Simulation</title>
-    <link rel="stylesheet" href="Style-2.css">
+    <title>3D Solar System Animation</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="canvas-container"></div>
-    <div id="controls">
-      <button id="toggle-orbits">Toggle Orbits</button>
-      <button id="toggle-labels">Toggle Labels</button>
-      <button id="toggle-asteroids">Toggle Asteroids</button>
-      <button id="toggle-real-scale">Toggle Real Scale</button>
-      <button id="reset-camera">Reset Camera</button>
-      <button id="start-tour">Start Tour</button>
-      <input type="text" id="search" placeholder="Search...">
-      <label for="speed">Speed:</label>
-      <input type="number" id="speed" value="1" min="0" step="0.1">
+    <div id="solar-system-container">
+        <!-- 3D solar system will be rendered here -->
     </div>
-
-    <script src="https://unpkg.com/three@latest/build/three.min.js"></script>
-    <script src="https://unpkg.com/three@latest/examples/jsm/controls/OrbitControls.js"></script>
-    <script src="https://unpkg.com/stats.js"></script>
-    <script src="script-2.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
