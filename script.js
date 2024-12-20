@@ -57,6 +57,20 @@ planetData.forEach((planet) => {
     planets.push(planetMesh);
 });
 
+// Add lighting
+const ambientLight = new THREE.AmbientLight(0x333333); // Dim light for general illumination
+scene.add(ambientLight);
+
+// Point light for the Sun
+const pointLight = new THREE.PointLight(0xffffff, 2, 1000); // Sun's light with intensity and distance
+pointLight.position.set(0, 0, 0); // Position at the Sun's location
+scene.add(pointLight);
+
+// Optional: Add a PointLight helper to debug (remove later if not needed)
+const pointLightHelper = new THREE.PointLightHelper(pointLight, 2);
+scene.add(pointLightHelper);
+
+
 // Position the camera
 camera.position.z = 100;
 
