@@ -5,13 +5,18 @@ const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.getElementById('solar-system-container').appendChild(renderer.domElement);
 
-// Add lighting
+// Add Ambient Light (Dim general illumination)
 const ambientLight = new THREE.AmbientLight(0x333333); // Dim light for general illumination
 scene.add(ambientLight);
 
-const pointLight = new THREE.PointLight(0xffffff, 2); // Sun's light
+// Add Point Light (Sun's light)
+const pointLight = new THREE.PointLight(0xffffff, 2, 1000); // Sun's light with intensity and distance
 pointLight.position.set(0, 0, 0);
 scene.add(pointLight);
+
+// Optional: Add a PointLight helper to debug (remove later if not needed)
+const pointLightHelper = new THREE.PointLightHelper(pointLight, 2);
+scene.add(pointLightHelper);
 
 // Load textures
 const textureLoader = new THREE.TextureLoader();
@@ -26,6 +31,20 @@ const textures = {
     uranus: textureLoader.load('textures/2k_uranus.jpg'),
     neptune: textureLoader.load('textures/2k_neptune.jpg'),
 };
+
+// Step 1: Load background textures for the skybox
+const loader = new THREE.CubeTextureLoader();
+const skyboxTexture = loader.load([
+    'textures/space_right.jpg', // Right
+    'textures/space_left.jpg',  // Left
+    'textures/space_top.jpg',   // Top
+    'textures/space_bottom.jpg',// Bottom
+    'textures/space_front.jpg', // Front
+    'textures/space_back.jpg',  // Back
+]);
+
+// Step 2: Apply the skybox to the scene's background
+scene.background = skyboxTexture;
 
 // Create the Sun
 const sunGeometry = new THREE.SphereGeometry(5, 32, 32);
@@ -56,21 +75,6 @@ planetData.forEach((planet) => {
     scene.add(planetMesh);
     planets.push(planetMesh);
 });
-
-
-// Step 1: Add Ambient Light (Dim general illumination)
-const ambientLight = new THREE.AmbientLight(0x333333); // Dim light for general illumination
-scene.add(ambientLight);
-
-// Step 2: Add Point Light (Simulate Sun's Light)
-const pointLight = new THREE.PointLight(0xffffff, 2, 1000); // Light intensity and distance (1000 units)
-pointLight.position.set(0, 0, 0); // Position at the Sun's location (center of the scene)
-scene.add(pointLight);
-
-// Step 3: Add Point Light Helper (Optional, for debugging the light source)
-const pointLightHelper = new THREE.PointLightHelper(pointLight, 2); // Size of the helper is 2 units
-scene.add(pointLightHelper);
-
 
 // Position the camera
 camera.position.z = 100;
