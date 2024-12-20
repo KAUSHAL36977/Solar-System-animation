@@ -32,20 +32,6 @@ const textures = {
     neptune: textureLoader.load('textures/2k_neptune.jpg'),
 };
 
-// Step 1: Load background textures for the skybox
-const loader = new THREE.CubeTextureLoader();
-const skyboxTexture = loader.load([
-    'textures/space_right.jpg', // Right
-    'textures/space_left.jpg',  // Left
-    'textures/space_top.jpg',   // Top
-    'textures/space_bottom.jpg',// Bottom
-    'textures/space_front.jpg', // Front
-    'textures/space_back.jpg',  // Back
-]);
-
-// Step 2: Apply the skybox to the scene's background
-scene.background = skyboxTexture;
-
 // Create the Sun
 const sunGeometry = new THREE.SphereGeometry(5, 32, 32);
 const sunMaterial = new THREE.MeshStandardMaterial({ map: textures.sun });
@@ -75,6 +61,27 @@ planetData.forEach((planet) => {
     scene.add(planetMesh);
     planets.push(planetMesh);
 });
+
+// Step 1: Add Ambient Light (Dim general illumination)
+scene.add(ambientLight);
+
+// Step 2: Add Point Light (Simulate Sun's Light)
+scene.add(pointLight);
+
+// Step 3: Add Point Light Helper (Optional, for debugging the light source)
+scene.add(pointLightHelper);
+
+// Step 4: Set up Skybox (Cube Texture for space background)
+const loader = new THREE.CubeTextureLoader();
+const skyboxTexture = loader.load([
+    'textures/space_right.jpg',
+    'textures/space_left.jpg',
+    'textures/space_top.jpg',
+    'textures/space_bottom.jpg',
+    'textures/space_front.jpg',
+    'textures/space_back.jpg',
+]);
+scene.background = skyboxTexture;
 
 // Position the camera
 camera.position.z = 100;
