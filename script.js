@@ -13,30 +13,42 @@ const pointLight = new THREE.PointLight(0xffffff, 2); // Sun's light
 pointLight.position.set(0, 0, 0);
 scene.add(pointLight);
 
-// Create the Sun with a texture
-const sunTexture = new THREE.TextureLoader().load('textures/sun.jpg');
+// Load textures
+const textureLoader = new THREE.TextureLoader();
+const textures = {
+    sun: textureLoader.load('textures/2k_sun.jpg'),
+    mercury: textureLoader.load('textures/2k_mercury.jpg'),
+    venus: textureLoader.load('textures/2k_venus_surface.jpg'),
+    earth: textureLoader.load('textures/2k_earth_daymap.jpg'),
+    mars: textureLoader.load('textures/2k_mars.jpg'),
+    jupiter: textureLoader.load('textures/2k_jupiter.jpg'),
+    saturn: textureLoader.load('textures/2k_saturn.jpg'),
+    uranus: textureLoader.load('textures/2k_uranus.jpg'),
+    neptune: textureLoader.load('textures/2k_neptune.jpg'),
+};
+
+// Create the Sun
 const sunGeometry = new THREE.SphereGeometry(5, 32, 32);
-const sunMaterial = new THREE.MeshStandardMaterial({ map: sunTexture });
+const sunMaterial = new THREE.MeshStandardMaterial({ map: textures.sun });
 const sun = new THREE.Mesh(sunGeometry, sunMaterial);
 scene.add(sun);
 
-// Create planets with textures
+// Create planets
 const planetData = [
-    { name: 'Mercury', size: 1, distance: 10, texture: 'textures/mercury.jpg' },
-    { name: 'Venus', size: 2, distance: 15, texture: 'textures/venus.jpg' },
-    { name: 'Earth', size: 2.5, distance: 20, texture: 'textures/earth.jpg' },
-    { name: 'Mars', size: 2, distance: 25, texture: 'textures/mars.jpg' },
-    { name: 'Jupiter', size: 6, distance: 35, texture: 'textures/jupiter.jpg' },
-    { name: 'Saturn', size: 5, distance: 45, texture: 'textures/saturn.jpg' },
-    { name: 'Uranus', size: 4, distance: 55, texture: 'textures/uranus.jpg' },
-    { name: 'Neptune', size: 4, distance: 65, texture: 'textures/neptune.jpg' }
+    { name: 'Mercury', size: 1, distance: 10, texture: textures.mercury },
+    { name: 'Venus', size: 2, distance: 15, texture: textures.venus },
+    { name: 'Earth', size: 2.5, distance: 20, texture: textures.earth },
+    { name: 'Mars', size: 2, distance: 25, texture: textures.mars },
+    { name: 'Jupiter', size: 6, distance: 35, texture: textures.jupiter },
+    { name: 'Saturn', size: 5, distance: 45, texture: textures.saturn },
+    { name: 'Uranus', size: 4, distance: 55, texture: textures.uranus },
+    { name: 'Neptune', size: 4, distance: 65, texture: textures.neptune },
 ];
 
 const planets = [];
 planetData.forEach((planet) => {
-    const texture = new THREE.TextureLoader().load(planet.texture);
     const planetGeometry = new THREE.SphereGeometry(planet.size, 32, 32);
-    const planetMaterial = new THREE.MeshStandardMaterial({ map: texture });
+    const planetMaterial = new THREE.MeshStandardMaterial({ map: planet.texture });
     const planetMesh = new THREE.Mesh(planetGeometry, planetMaterial);
 
     // Position planets
