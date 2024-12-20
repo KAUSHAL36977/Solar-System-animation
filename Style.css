@@ -1,22 +1,28 @@
-/* Reset styles */
-* {
+/* General styles for the page */
+body {
     margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+    overflow: hidden; /* Prevent scrollbars from appearing */
+    background: linear-gradient(to bottom, #000428, #004e92); /* Space-like gradient */
+    font-family: Arial, sans-serif;
 }
 
-/* Body styling */
-body {
-    background-color: black; /* Space background */
+/* Container for the 3D Solar System */
+#solar-system-container {
+    width: 100vw;
+    height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    position: relative;
 }
 
-/* Solar system container */
-#solar-system-container {
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
+/* Optional: Styling for loading screen or additional elements */
+#loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 2em;
+    display: none; /* Set to 'block' if implementing a loading screen */
 }
