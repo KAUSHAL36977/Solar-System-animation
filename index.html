@@ -16,6 +16,41 @@
         <button id="speedDown">Slow Down</button>
         <button id="speedUp">Speed Up</button>
         <button id="toggleLabels">Toggle Labels</button>
+        <div class="camera-controls">
+            <div class="control-group">
+                <label>Camera X:</label>
+                <input type="range" id="cameraX" min="-200" max="200" value="0">
+                <span id="cameraXValue">0</span>
+            </div>
+            <div class="control-group">
+                <label>Camera Y:</label>
+                <input type="range" id="cameraY" min="-200" max="200" value="50">
+                <span id="cameraYValue">50</span>
+            </div>
+            <div class="control-group">
+                <label>Camera Z:</label>
+                <input type="range" id="cameraZ" min="-200" max="200" value="100">
+                <span id="cameraZValue">100</span>
+            </div>
+            <button id="resetCamera">Reset Camera</button>
+            <button id="topView">Top View</button>
+            <button id="sideView">Side View</button>
+        </div>
+    </div>
+    
+    <div id="loading">
+        <div class="loader"></div>
+        <p>Loading Solar System...</p>
+    </div>
+
+    <canvas id="solarSystem"></canvas>
+
+    <div class="debug-panel">
+        <button id="toggleDebug">Debug Info</button>
+        <div id="debugInfo" class="hidden">
+            <p>FPS: <span id="fps">0</span></p>
+            <p>Visible planets: <span id="visiblePlanets">0</span></p>
+        </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
