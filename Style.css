@@ -1,81 +1,112 @@
-/* General Reset */
-body, html {
-  margin: 0;
-  padding: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  background: radial-gradient(circle, #000428 0%, #004e92 100%);
-  color: white;
-  font-family: Arial, sans-serif;
-  overflow: hidden;
+// Initialize the scene, camera, and renderer
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+const renderer = new THREE.WebGLRenderer({ antialias: true }); // Enable antialiasing
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
+// Add Ambient Light (Dim general illumination)
+const ambientLight = new THREE.AmbientLight(0x333333, 0.5); // Dim light for general illumination, reduced intensity
+scene.add(ambientLight);
+
+
+// Add Point Light (Sun's light)
+const pointLight = new THREE.PointLight(0xffffff, 2, 1000); // Sun's light with intensity and distance
+pointLight.position.set(0, 0, 0);
+scene.add(pointLight);
+
+// Optional: Add a PointLight helper to debug (remove later if not needed)
+const pointLightHelper = new THREE.PointLightHelper(pointLight, 2);
+scene.add(pointLightHelper);
+
+// Load textures
+const textureLoader = new THREE.TextureLoader();
+const textures = {
+    sun: textureLoader.load('textures/sun.jpg'),
+    mercury: textureLoader.load('textures/mercury.jpg'),
+    venus: textureLoader.load('textures/venus.jpg'),
+    earth: textureLoader.load('textures/earth.jpg'),
+    mars: textureLoader.load('textures/mars.jpg'),
+    jupiter: textureLoader.load('textures/jupiter.jpg'),
+    saturn: textureLoader.load('textures/saturn.jpg'),
+    uranus: textureLoader.load('textures/uranus.jpg'),
+    neptune: textureLoader.load('textures/neptune.jpg'),
+};
+
+// Create the Sun
+const sunGeometry = new THREE.SphereGeometry(5, 32, 32);
+const sunMaterial = new THREE.MeshStandardMaterial({ map: textures.sun });
+const sun = new THREE.Mesh(sunGeometry, sunMaterial);
+scene.add(sun);
+
+// Create planets
+const planetData = [
+    { name: 'Mercury', size: 0.38, distance: 7, orbitSpeed: 0.04, texture: textures.mercury },
+    { name: 'Venus', size: 0.95, distance: 10, orbitSpeed: 0.03, texture: textures.venus },
+    { name: 'Earth', size: 1, distance: 15, orbitSpeed: 0.02, texture: textures.earth },
+    { name: 'Mars', size: 0.53, distance: 20, orbitSpeed: 0.015, texture: textures.mars },
+    { name: 'Jupiter', size: 11.2, distance: 35, orbitSpeed: 0.008, texture: textures.jupiter },
+    { name: 'Saturn', size: 9.4, distance: 50, orbitSpeed: 0.006, texture: textures.saturn },
+    { name: 'Uranus', size: 4, distance: 65, orbitSpeed: 0.004, texture: textures.uranus },
+    { name: 'Neptune', size: 3.8, distance: 80, orbitSpeed: 0.003, texture: textures.neptune },
+];
+
+const planets = [];
+planetData.forEach((planet) => {
+    const planetGeometry = new THREE.SphereGeometry(planet.size, 32, 32);
+    const planetMaterial = new THREE.MeshStandardMaterial({ map: planet.texture });
+    const planetMesh = new THREE.Mesh(planetGeometry, planetMaterial);
+    planetMesh.name = planet.name;
+    scene.add(planetMesh);
+    planets.push(planetMesh);
+});
+
+// Add Saturn's rings
+const saturnRingsGeometry = new THREE.RingGeometry(10, 15, 64);
+const saturnRingsMaterial = new THREE.MeshStandardMaterial({ map: textureLoader.load('textures/saturn_rings.png'), side: THREE.DoubleSide, transparent: true, opacity: 0.6 });
+const saturnRings = new THREE.Mesh(saturnRingsGeometry, saturnRingsMaterial);
+saturnRings.rotation.x = Math.PI / 2.5;
+scene.add(saturnRings);
+
+
+// Add Skybox (Cube Texture for space background)
+const skyboxTexture = new THREE.CubeTextureLoader().load(['textures/space_right.jpg', 'textures/space_left.jpg', 'textures/space_top.jpg', 'textures/space_bottom.jpg', 'textures/space_front.jpg', 'textures/space_back.jpg']);
+scene.background = skyboxTexture;
+// Step 2: Add Point Light (Simulate Sun's Light)
+scene.add(pointLight);
+
+// Step 3: Add Point Light Helper (Optional, for debugging the light source)
+scene.add(pointLightHelper);
+
+// Step 4: Set up Skybox (Cube Texture for space background)
+
+// Position the camera
+camera.position.z = 150;
+
+// Animation loop
+function animate() {
+    requestAnimationFrame(animate);
+
+    // Rotate the Sun
+    sun.rotation.y += 0.004;
+
+     // Move Saturn's rings with Saturn
+     const saturn = planets.find(p => p.name === 'Saturn');
+     if (saturn) {
+        saturnRings.position.copy(saturn.position);
+     }
+
+     
+    // Rotate planets and simulate orbits
+    planets.forEach((planet, index) => {
+        planet.rotation.y += 0.01; // Rotation on axis
+        const speed = 0.001 * (index + 1); // Orbit speed
+        planet.position.x = Math.cos(Date.now() * speed) * planetData[index].distance;
+        planet.position.z = Math.sin(Date.now() * speed) * planetData[index].distance;
+    });
+    
+    camera.lookAt(0, 0, 0);
+    renderer.render(scene, camera);
 }
 
-/* Solar System Container */
-ol {
-  all: unset;
-  aspect-ratio: 1 / 1;
-  display: grid;
-  width: 100%;
-  height: 100%;
-  place-content: center;
-  position: relative;
-  container-type: inline-size;
-}
-
-/* Grid Stack for Planet Orbits */
-li {
-  grid-area: 1 / -1;
-  place-self: center;
-  width: 100%;
-  height: 100%;
-  border: 1px dashed rgba(255, 255, 255, 0.2); /* Orbit line */
-  border-radius: 50%;
-  position: relative;
-}
-
-/* Individual Planets */
-li::after {
-  aspect-ratio: 1 / 1;
-  background: var(--b);
-  border-radius: 50%;
-  content: '';
-  display: block;
-  width: var(--w, 2cqi);
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  animation: rotate var(--t, 3s) linear infinite;
-  offset-path: content-box;
-}
-
-/* Planetary Gradients and Sizes */
-.mercury { --b: radial-gradient(circle, #c2c2c2 0%, #8a8a8a 100%); --w: 2.0526cqi; --t: 3s; }
-.venus   { --b: radial-gradient(circle, #f4d03f 0%, #c39c43 100%); --w: 2.6053cqi; --t: 4s; }
-.earth   { --b: radial-gradient(circle, #3a82f7 0%, #2f9e44 80%, #1a5e20 100%); --w: 3.1579cqi; --t: 5s; }
-.mars    { --b: radial-gradient(circle, #e57373 0%, #af4448 100%); --w: 3.7105cqi; --t: 6s; }
-.jupiter { --b: radial-gradient(circle, #d4a373 0%, #b36d32 50%, #f4e7d3 100%); --w: 4.8158cqi; --t: 7s; }
-.saturn  { --b: radial-gradient(circle, #e6dba0 0%, #c2a13e 100%); --w: 5.3684cqi; --t: 8s; }
-.uranus  { --b: radial-gradient(circle, #7de3f4 0%, #3ba0b5 100%); --w: 4.2632cqi; --t: 9s; }
-.neptune { --b: radial-gradient(circle, #4c6ef5 0%, #1b3b8c 100%); --w: 6cqi; --t: 10s; }
-
-/* Animating Planet Rotations */
-@keyframes rotate {
-  to {
-    offset-distance: 100%;
-  }
-}
-
-/* Sun */
-.sun {
-  width: 8cqi;
-  height: 8cqi;
-  background: radial-gradient(circle, #ffcc00 0%, #ff9900 80%, #ff6600 100%);
-  border-radius: 50%;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
+animate();
