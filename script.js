@@ -1,111 +1,355 @@
-// Initialize the scene, camera, and renderer
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-const renderer = new THREE.WebGLRenderer({ antialias: true }); // Enable antialiasing
-renderer.setSize(window.innerWidth, window.innerHeight);
-document.body.appendChild(renderer.domElement);
-
-// Add Ambient Light (Dim general illumination)
-const ambientLight = new THREE.AmbientLight(0x333333, 0.5); // Dim light for general illumination, reduced intensity
-scene.add(ambientLight);
-
-
-// Add Point Light (Sun's light)
-const pointLight = new THREE.PointLight(0xffffff, 2, 1000); // Sun's light with intensity and distance
-pointLight.position.set(0, 0, 0);
-scene.add(pointLight);
-
-// Optional: Add a PointLight helper to debug (remove later if not needed)
-const pointLightHelper = new THREE.PointLightHelper(pointLight, 2);
-scene.add(pointLightHelper);
-
-// Load textures
-const textureLoader = new THREE.TextureLoader();
+// Texture URLs (replace with your actual texture paths)
 const textures = {
-    sun: textureLoader.load('textures/sun.jpg'),
-    mercury: textureLoader.load('textures/mercury.jpg'),
-    venus: textureLoader.load('textures/venus.jpg'),
-    earth: textureLoader.load('textures/earth.jpg'),
-    mars: textureLoader.load('textures/mars.jpg'),
-    jupiter: textureLoader.load('textures/jupiter.jpg'),
-    saturn: textureLoader.load('textures/saturn.jpg'),
-    uranus: textureLoader.load('textures/uranus.jpg'),
-    neptune: textureLoader.load('textures/neptune.jpg'),
+    sun: "/api/placeholder/400/400",
+    mercury: "/api/placeholder/400/400",
+    venus: "/api/placeholder/400/400",
+    earth: "/api/placeholder/400/400",
+    moon: "/api/placeholder/400/400",
+    mars: "/api/placeholder/400/400",
+    jupiter: "/api/placeholder/400/400",
+    saturn: "/api/placeholder/400/400",
+    saturnRing: "/api/placeholder/400/400",
+    uranus: "/api/placeholder/400/400",
+    neptune: "/api/placeholder/400/400"
 };
 
+// Configuration data for the planets
+const planetData = [
+    { name: "Mercury", texture: textures.mercury, size: 0.38, distance: 5, speed: 4.1, color: 0xAAAAAA },
+    { name: "Venus", texture: textures.venus, size: 0.95, distance: 7, speed: 1.6, color: 0xE39E1C },
+    { name: "Earth", texture: textures.earth, size: 1, distance: 10, speed: 1, color: 0x2E97D8, 
+      moons: [{ name: "Moon", texture: textures.moon, size: 0.27, distance: 2, speed: 10, color: 0xDDDDDD }] },
+    { name: "Mars", texture: textures.mars, size: 0.53, distance: 15, speed: 0.53, color: 0xD83A18 },
+    { name: "Jupiter", texture: textures.jupiter, size: 11.2, distance: 50, speed: 0.084, color: 0xE3DCCB },
+    { name: "Saturn", texture: textures.saturn, size: 9.45, distance: 90, speed: 0.034, color: 0xEAD6B8, 
+      ring: { texture: textures.saturnRing, innerRadius: 10, outerRadius: 20 } },
+    { name: "Uranus", texture: textures.uranus, size: 4, distance: 180, speed: 0.012, color: 0xCAF8F3 },
+    { name: "Neptune", texture: textures.neptune, size: 3.88, distance: 280, speed: 0.006, color: 0x3E5BF6 }
+];
+
+// Set up the scene
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMap.enabled = true;
+document.body.appendChild(renderer.domElement);
+
+// Lighting
+const ambientLight = new THREE.AmbientLight(0x404040, 0.5);
+scene.add(ambientLight);
+
+const pointLight = new THREE.PointLight(0xFFFFFF, 2, 0, 1);
+pointLight.position.set(0, 0, 0);
+pointLight.castShadow = true;
+scene.add(pointLight);
+
+// Add some stars in the background
+const starsGeometry = new THREE.BufferGeometry();
+const starsMaterial = new THREE.PointsMaterial({
+    color: 0xFFFFFF,
+    size: 0.2,
+    transparent: true
+});
+
+const starsVertices = [];
+for (let i = 0; i < 10000; i++) {
+    const x = (Math.random() - 0.5) * 2000;
+    const y = (Math.random() - 0.5) * 2000;
+    const z = (Math.random() - 0.5) * 2000;
+    starsVertices.push(x, y, z);
+}
+
+starsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starsVertices, 3));
+const stars = new THREE.Points(starsGeometry, starsMaterial);
+scene.add(stars);
+
+// Create stardust particles
+const dustGeometry = new THREE.BufferGeometry();
+const dustVertices = [];
+const dustVelocities = [];
+const dustParticleCount = 2000;
+
+for (let i = 0; i < dustParticleCount; i++) {
+    // Position dust in a disc shape around the solar system
+    const radius = 5 + Math.random() * 400;
+    const theta = Math.random() * Math.PI * 2;
+    
+    const x = radius * Math.cos(theta);
+    const z = radius * Math.sin(theta);
+    const y = (Math.random() - 0.5) * 20; // Thin disc
+    
+    dustVertices.push(x, y, z);
+    
+    // Store velocity for animation
+    const speed = 0.01 + Math.random() * 0.05;
+    dustVelocities.push({
+        x: Math.cos(theta + Math.PI/2) * speed * (1 / Math.sqrt(radius)),
+        y: (Math.random() - 0.5) * 0.01,
+        z: Math.sin(theta + Math.PI/2) * speed * (1 / Math.sqrt(radius))
+    });
+}
+
+dustGeometry.setAttribute('position', new THREE.Float32BufferAttribute(dustVertices, 3));
+
+const dustMaterial = new THREE.PointsMaterial({
+    color: 0xAAAAAA,
+    size: 0.5,
+    transparent: true,
+    opacity: 0.8,
+    blending: THREE.AdditiveBlending
+});
+
+const dust = new THREE.Points(dustGeometry, dustMaterial);
+scene.add(dust);
+
 // Create the Sun
-const sunGeometry = new THREE.SphereGeometry(5, 32, 32);
-const sunMaterial = new THREE.MeshStandardMaterial({ map: textures.sun });
+const sunGeometry = new THREE.SphereGeometry(3, 32, 32);
+const sunMaterial = new THREE.MeshBasicMaterial({
+    map: new THREE.TextureLoader().load(textures.sun),
+    emissive: 0xFFFF99,
+    emissiveIntensity: 0.5
+});
 const sun = new THREE.Mesh(sunGeometry, sunMaterial);
 scene.add(sun);
 
-// Create planets
-const planetData = [
-    { name: 'Mercury', size: 0.38, distance: 7, orbitSpeed: 0.04, texture: textures.mercury },
-    { name: 'Venus', size: 0.95, distance: 10, orbitSpeed: 0.03, texture: textures.venus },
-    { name: 'Earth', size: 1, distance: 15, orbitSpeed: 0.02, texture: textures.earth },
-    { name: 'Mars', size: 0.53, distance: 20, orbitSpeed: 0.015, texture: textures.mars },
-    { name: 'Jupiter', size: 11.2, distance: 35, orbitSpeed: 0.008, texture: textures.jupiter },
-    { name: 'Saturn', size: 9.4, distance: 50, orbitSpeed: 0.006, texture: textures.saturn },
-    { name: 'Uranus', size: 4, distance: 65, orbitSpeed: 0.004, texture: textures.uranus },
-    { name: 'Neptune', size: 3.8, distance: 80, orbitSpeed: 0.003, texture: textures.neptune },
-];
+// Create a glow effect for the sun
+const sunGlowGeometry = new THREE.SphereGeometry(3.5, 32, 32);
+const sunGlowMaterial = new THREE.MeshBasicMaterial({
+    color: 0xFFFFFF,
+    transparent: true,
+    opacity: 0.15,
+    side: THREE.BackSide
+});
+const sunGlow = new THREE.Mesh(sunGlowGeometry, sunGlowMaterial);
+scene.add(sunGlow);
 
+// Create planets
 const planets = [];
-planetData.forEach((planet) => {
-    const planetGeometry = new THREE.SphereGeometry(planet.size, 32, 32);
-    const planetMaterial = new THREE.MeshStandardMaterial({ map: planet.texture });
-    const planetMesh = new THREE.Mesh(planetGeometry, planetMaterial);
-    planetMesh.name = planet.name;
-    scene.add(planetMesh);
-    planets.push(planetMesh);
+const planetLabels = [];
+const planetOrbits = [];
+
+const loader = new THREE.TextureLoader();
+
+planetData.forEach(planet => {
+    // Create orbit
+    const orbitGeometry = new THREE.RingGeometry(planet.distance, planet.distance + 0.1, 128);
+    const orbitMaterial = new THREE.MeshBasicMaterial({
+        color: 0x444444,
+        transparent: true,
+        opacity: 0.2,
+        side: THREE.DoubleSide
+    });
+    const orbit = new THREE.Mesh(orbitGeometry, orbitMaterial);
+    orbit.rotation.x = Math.PI / 2;
+    scene.add(orbit);
+    planetOrbits.push(orbit);
+
+    // Create planet
+    const geometry = new THREE.SphereGeometry(planet.size, 32, 32);
+    const material = new THREE.MeshStandardMaterial({
+        map: loader.load(planet.texture),
+        color: planet.color
+    });
+    const mesh = new THREE.Mesh(geometry, material);
+    
+    // Position planet
+    const angle = Math.random() * Math.PI * 2;
+    mesh.position.x = Math.cos(angle) * planet.distance;
+    mesh.position.z = Math.sin(angle) * planet.distance;
+    
+    const planetObj = {
+        mesh,
+        angle,
+        data: planet,
+        moons: []
+    };
+    
+    planets.push(planetObj);
+    scene.add(mesh);
+    
+    // Create planet label
+    const planetDiv = document.createElement('div');
+    planetDiv.className = 'label';
+    planetDiv.textContent = planet.name;
+    document.body.appendChild(planetDiv);
+    planetLabels.push(planetDiv);
+    
+    // Add moons if the planet has any
+    if (planet.moons) {
+        planet.moons.forEach(moon => {
+            const moonGeometry = new THREE.SphereGeometry(moon.size, 32, 32);
+            const moonMaterial = new THREE.MeshStandardMaterial({
+                map: loader.load(moon.texture),
+                color: moon.color
+            });
+            const moonMesh = new THREE.Mesh(moonGeometry, moonMaterial);
+            
+            const moonObj = {
+                mesh: moonMesh,
+                angle: Math.random() * Math.PI * 2,
+                data: moon,
+                parent: planetObj
+            };
+            
+            planetObj.moons.push(moonObj);
+            scene.add(moonMesh);
+        });
+    }
+    
+    // Add ring for Saturn
+    if (planet.ring) {
+        const ringGeometry = new THREE.RingGeometry(
+            planet.size + 2, 
+            planet.size + 4, 
+            32
+        );
+        const ringMaterial = new THREE.MeshStandardMaterial({
+            map: loader.load(planet.ring.texture),
+            color: 0xCCBB99,
+            side: THREE.DoubleSide,
+            transparent: true,
+            opacity: 0.8
+        });
+        const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+        ring.rotation.x = Math.PI / 2;
+        planetObj.ring = ring;
+        mesh.add(ring);
+    }
 });
 
-// Add Saturn's rings
-const saturnRingsGeometry = new THREE.RingGeometry(10, 15, 64);
-const saturnRingsMaterial = new THREE.MeshStandardMaterial({ map: textureLoader.load('textures/saturn_rings.png'), side: THREE.DoubleSide, transparent: true, opacity: 0.6 });
-const saturnRings = new THREE.Mesh(saturnRingsGeometry, saturnRingsMaterial);
-saturnRings.rotation.x = Math.PI / 2.5;
-scene.add(saturnRings);
+// Controls
+const controls = new THREE.OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.05;
+controls.screenSpacePanning = false;
+controls.minDistance = 5;
+controls.maxDistance = 500;
 
+// Position camera
+camera.position.set(0, 50, 100);
+controls.update();
 
-// Add Skybox (Cube Texture for space background)
-const skyboxTexture = new THREE.CubeTextureLoader().load(['textures/space_right.jpg', 'textures/space_left.jpg', 'textures/space_top.jpg', 'textures/space_bottom.jpg', 'textures/space_front.jpg', 'textures/space_back.jpg']);
-scene.background = skyboxTexture;
-// Step 2: Add Point Light (Simulate Sun's Light)
-scene.add(pointLight);
+// Time tracking
+let time = 0;
+let timeScale = 1.0;
+let showLabels = false;
 
-// Step 3: Add Point Light Helper (Optional, for debugging the light source)
-scene.add(pointLightHelper);
+// Resize handler
+window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+});
 
-// Step 4: Set up Skybox (Cube Texture for space background)
+// Speed control buttons
+document.getElementById('speedDown').addEventListener('click', () => {
+    timeScale = Math.max(0.1, timeScale * 0.5);
+});
 
-// Position the camera
-camera.position.z = 150;
+document.getElementById('speedUp').addEventListener('click', () => {
+    timeScale = Math.min(10, timeScale * 2);
+});
+
+document.getElementById('toggleLabels').addEventListener('click', () => {
+    showLabels = !showLabels;
+    planetLabels.forEach(label => {
+        label.style.display = showLabels ? 'block' : 'none';
+    });
+});
 
 // Animation loop
 function animate() {
     requestAnimationFrame(animate);
-
-    // Rotate the Sun
-    sun.rotation.y += 0.004;
-
-     // Move Saturn's rings with Saturn
-     const saturn = planets.find(p => p.name === 'Saturn');
-     if (saturn) {
-        saturnRings.position.copy(saturn.position);
-     }
-
-     
-    // Rotate planets and simulate orbits
+    
+    time += 0.001 * timeScale;
+    
+    // Rotate the sun
+    sun.rotation.y += 0.001 * timeScale;
+    
+    // Animate stardust
+    const dustPositions = dust.geometry.attributes.position.array;
+    
+    for (let i = 0; i < dustParticleCount; i++) {
+        const i3 = i * 3;
+        
+        dustPositions[i3] += dustVelocities[i].x * timeScale;
+        dustPositions[i3 + 1] += dustVelocities[i].y * timeScale;
+        dustPositions[i3 + 2] += dustVelocities[i].z * timeScale;
+        
+        // Reset particles that get too far away
+        const distance = Math.sqrt(
+            dustPositions[i3] * dustPositions[i3] + 
+            dustPositions[i3 + 1] * dustPositions[i3 + 1] + 
+            dustPositions[i3 + 2] * dustPositions[i3 + 2]
+        );
+        
+        if (distance > 500) {
+            // Reset to a new position on the disc
+            const radius = 5 + Math.random() * 400;
+            const theta = Math.random() * Math.PI * 2;
+            
+            dustPositions[i3] = radius * Math.cos(theta);
+            dustPositions[i3 + 1] = (Math.random() - 0.5) * 20;
+            dustPositions[i3 + 2] = radius * Math.sin(theta);
+            
+            // Update velocity
+            const speed = 0.01 + Math.random() * 0.05;
+            dustVelocities[i] = {
+                x: Math.cos(theta + Math.PI/2) * speed * (1 / Math.sqrt(radius)),
+                y: (Math.random() - 0.5) * 0.01,
+                z: Math.sin(theta + Math.PI/2) * speed * (1 / Math.sqrt(radius))
+            };
+        }
+    }
+    
+    dust.geometry.attributes.position.needsUpdate = true;
+    
+    // Update planet positions
     planets.forEach((planet, index) => {
-        planet.rotation.y += 0.01; // Rotation on axis
-        const speed = 0.001 * (index + 1); // Orbit speed
-        planet.position.x = Math.cos(Date.now() * speed) * planetData[index].distance;
-        planet.position.z = Math.sin(Date.now() * speed) * planetData[index].distance;
+        planet.angle += planet.data.speed * 0.001 * timeScale;
+        
+        planet.mesh.position.x = Math.cos(planet.angle) * planet.data.distance;
+        planet.mesh.position.z = Math.sin(planet.angle) * planet.data.distance;
+        planet.mesh.rotation.y += 0.005 * timeScale;
+        
+        // Update label position
+        if (showLabels) {
+            const vector = new THREE.Vector3();
+            vector.copy(planet.mesh.position);
+            vector.project(camera);
+            
+            const x = (vector.x * 0.5 + 0.5) * window.innerWidth;
+            const y = (-vector.y * 0.5 + 0.5) * window.innerHeight;
+            
+            planetLabels[index].style.transform = `translate(-50%, -50%) translate(${x}px, ${y}px)`;
+        }
+        
+        // Update moons
+        planet.moons.forEach(moon => {
+            moon.angle += moon.data.speed * 0.01 * timeScale;
+            
+            // Position moon relative to its planet
+            const moonX = Math.cos(moon.angle) * moon.data.distance;
+            const moonZ = Math.sin(moon.angle) * moon.data.distance;
+            
+            moon.mesh.position.x = planet.mesh.position.x + moonX;
+            moon.mesh.position.y = planet.mesh.position.y;
+            moon.mesh.position.z = planet.mesh.position.z + moonZ;
+            
+            moon.mesh.rotation.y += 0.01 * timeScale;
+        });
+        
+        // Tilt Saturn's rings
+        if (planet.ring) {
+            planet.ring.rotation.z = 0.5;
+        }
     });
     
-    camera.lookAt(0, 0, 0);
+    // Make stars twinkle slightly
+    stars.rotation.y += 0.0001;
+    
+    controls.update();
     renderer.render(scene, camera);
 }
 
