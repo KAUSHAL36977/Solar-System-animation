@@ -2,10 +2,19 @@ body {
     margin: 0;
     overflow: hidden;
     background-color: #000;
+    font-family: Arial, sans-serif;
+    height: 100vh;
+    width: 100vw;
 }
 
 canvas {
     display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
 }
 
 .info {
@@ -13,11 +22,17 @@ canvas {
     bottom: 10px;
     left: 10px;
     color: white;
-    font-family: Arial, sans-serif;
-    font-size: 14px;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(0, 0, 0, 0.7);
     padding: 10px;
     border-radius: 5px;
+    z-index: 10;
+    border: 1px solid #333;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+}
+
+.info h2 {
+    margin-top: 0;
+    color: #FFD700;
 }
 
 .controls {
@@ -25,20 +40,24 @@ canvas {
     top: 10px;
     right: 10px;
     color: white;
-    font-family: Arial, sans-serif;
-    background-color: rgba(0, 0, 0, 0.5);
-    padding: 10px;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 15px;
     border-radius: 5px;
+    z-index: 10;
+    max-width: 300px;
+    border: 1px solid #333;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
 }
 
 button {
     background-color: #333;
     color: white;
     border: none;
-    padding: 5px 10px;
-    margin: 2px;
-    border-radius: 3px;
+    padding: 8px 12px;
+    margin: 4px;
+    border-radius: 4px;
     cursor: pointer;
+    transition: background-color 0.3s;
 }
 
 button:hover {
@@ -48,11 +67,86 @@ button:hover {
 .label {
     color: #FFFFFF;
     position: absolute;
-    padding: 2px;
-    background-color: rgba(0, 0, 0, 0.6);
-    border-radius: 3px;
+    padding: 4px 8px;
+    background-color: rgba(0, 0, 0, 0.7);
+    border-radius: 4px;
     font-size: 12px;
-    font-family: Arial, sans-serif;
+    font-weight: bold;
     pointer-events: none;
     display: none;
+    z-index: 20;
+    border: 1px solid #555;
+    text-shadow: 0 0 3px #000;
+}
+
+.camera-controls {
+    margin-top: 15px;
+    border-top: 1px solid #555;
+    padding-top: 10px;
+}
+
+.control-group {
+    display: flex;
+    align-items: center;
+    margin: 5px 0;
+}
+
+.control-group label {
+    width: 80px;
+}
+
+.control-group input {
+    flex-grow: 1;
+    margin: 0 10px;
+}
+
+#loading {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    color: white;
+}
+
+.loader {
+    border: 4px solid #333;
+    border-top: 4px solid #FFD700;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.debug-panel {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 10px;
+    border-radius: 5px;
+    z-index: 100;
+    border: 1px solid #333;
+}
+
+.hidden {
+    display: none;
+}
+
+/* Glow effects */
+.glow {
+    text-shadow: 0 0 5px #FFD700, 0 0 10px #FFD700;
 }
