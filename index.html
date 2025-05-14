@@ -3,60 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Solar System Animation</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Interactive Solar System</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #000;
+            font-family: Arial, sans-serif;
+        }
+        canvas {
+            display: block;
+        }
+        #info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            font-size: 16px;
+            pointer-events: none;
+            text-shadow: 0 0 5px rgba(0,0,0,0.5);
+        }
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            color: white;
+            background: rgba(0,0,0,0.5);
+            padding: 10px;
+            border-radius: 5px;
+        }
+        #tooltip {
+            position: absolute;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            pointer-events: none;
+            display: none;
+        }
+        .control-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            margin: 5px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .control-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+    </style>
 </head>
 <body>
-    <div class="info">
-        <h2>Solar System</h2>
-        <p>Use mouse to rotate the view</p>
-        <p>Scroll to zoom in/out</p>
+    <div id="info">Interactive Solar System</div>
+    <div id="tooltip"></div>
+    <div id="controls">
+        <button class="control-btn" id="toggleOrbits">Toggle Orbits</button>
+        <button class="control-btn" id="toggleLabels">Toggle Labels</button>
+        <button class="control-btn" id="toggleAutoRotate">Auto Rotate</button>
     </div>
-    <div class="controls">
-        <button id="speedDown">Slow Down</button>
-        <button id="speedUp">Speed Up</button>
-        <button id="toggleLabels">Toggle Labels</button>
-        <div class="camera-controls">
-            <div class="control-group">
-                <label>Camera X:</label>
-                <input type="range" id="cameraX" min="-200" max="200" value="0">
-                <span id="cameraXValue">0</span>
-            </div>
-            <div class="control-group">
-                <label>Camera Y:</label>
-                <input type="range" id="cameraY" min="-200" max="200" value="50">
-                <span id="cameraYValue">50</span>
-            </div>
-            <div class="control-group">
-                <label>Camera Z:</label>
-                <input type="range" id="cameraZ" min="-200" max="200" value="100">
-                <span id="cameraZValue">100</span>
-            </div>
-            <button id="resetCamera">Reset Camera</button>
-            <button id="topView">Top View</button>
-            <button id="sideView">Side View</button>
-        </div>
-    </div>
-    
-    <div id="loading">
-        <div class="loader"></div>
-        <p>Loading Solar System...</p>
-    </div>
-
-    <canvas id="solarSystem"></canvas>
-
-    <div class="debug-panel">
-        <button id="toggleDebug">Debug Info</button>
-        <div id="debugInfo" class="hidden">
-            <p>FPS: <span id="fps">0</span></p>
-            <p>Visible planets: <span id="visiblePlanets">0</span></p>
-        </div>
-    </div>
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.7/dat.gui.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.7.1/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
     <script src="script.js"></script>
 </body>
-</html>
+</html> 
