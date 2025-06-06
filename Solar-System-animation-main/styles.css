@@ -1,0 +1,76 @@
+:root {
+    /* Colors */
+    --color-sun: #ffff00;
+    --color-mercury: #888888;
+    --color-venus: #e39e1c;
+    --color-earth: #2233ff;
+    --color-mars: #c1440e;
+    --color-jupiter: #d8ca9d;
+    --color-saturn: #ead6b8;
+    --color-uranus: #5580aa;
+    --color-neptune: #366896;
+    --color-asteroid: #888888;
+    --color-orbit: #444444;
+    --color-background: #000000;
+
+    /* Texture URLs (relative to textures/ folder) */
+    --texture-sun: url('textures/sun.jpg');
+    --texture-mercury: url('textures/mercury.jpg');
+    --texture-venus: url('textures/venus.jpg');
+    --texture-earth: url('textures/earth.jpg');
+    --texture-mars: url('textures/mars.jpg');
+    --texture-jupiter: url('textures/jupiter.jpg');
+    --texture-saturn: url('textures/saturn.jpg');
+    --texture-uranus: url('textures/uranus.jpg');
+    --texture-neptune: url('textures/neptune.jpg');
+
+    /* Light intensities */
+    --light-sun-intensity: 6;
+    --light-planet-intensity: 0.2;
+    --light-asteroid-intensity: 0.5;
+}
+
+body {
+    background: var(--color-background);
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+
+#info {
+    color: white;
+    text-shadow: 0 0 5px rgba(0,0,0,0.5);
+}
+
+#controls {
+    background: rgba(0,0,0,0.7);
+    color: white;
+    border-radius: 8px;
+    padding: 12px 18px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.control-btn {
+    background: rgba(255,255,255,0.15);
+    border: none;
+    color: white;
+    padding: 7px 14px;
+    margin: 5px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 15px;
+    transition: background 0.2s;
+}
+.control-btn:hover {
+    background: rgba(255,255,255,0.3);
+}
+
+#tooltip {
+    background: rgba(0,0,0,0.85);
+    color: white;
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-size: 16px;
+    pointer-events: none;
+    display: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+} 
