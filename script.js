@@ -93,7 +93,7 @@ const planetMeshes = planets.map(planet => {
     mesh.rotation.x = planet.tilt;
     scene.add(mesh);
 
-    // Create label
+    // Create label for this
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d');
     canvas.width = 256;
