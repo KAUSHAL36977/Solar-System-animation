@@ -34,7 +34,10 @@ body {
     background: var(--color-background);
     margin: 0;
     font-family: Arial, sans-serif;
+    background-image: url("Solar-System-animation-main/jeremy-thomas-E0AHdsENmDg-unsplash.jpg");
+    background-size: cover;
 }
+
 
 #info {
     color: white;
