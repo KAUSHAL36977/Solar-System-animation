@@ -2,19 +2,15 @@ body {
     margin: 0;
     overflow: hidden;
     background-color: #000;
-    font-family: Arial, sans-serif;
+    font-family: "Orbitron", sans-serif;
     height: 100vh;
     width: 100vw;
-        background-image: url("./jeremy-thomas-E0AHdsENmDg-unsplash.jpg");
+    background-image: url("./jeremy-thomas-E0AHdsENmDg-unsplash.jpg");
     background-size: cover;
     
 }
 
-.unifrakturmaguntia-regular {
-  font-family: "UnifrakturMaguntia", cursive;
-  font-weight: 400;
-  font-style: normal;
-}
+
 
 canvas {
     display: block;
@@ -60,6 +56,7 @@ canvas {
 
 button {
     background-color: #333;
+    font-family: "Orbitron", sans-serif;
     color: white;
     border: none;
     padding: 8px 12px;
