@@ -9,7 +9,9 @@ body {
     background-size: cover;
     
 }
-
+.header{
+    color: White;
+}
 canvas {
     display: block;
     position: absolute;
